@@ -148,6 +148,7 @@ dmypy.json
 
 # do not track the data_access_config.py file.
 cluster_cat_dr/data_access_config.py
+data_access_config.py
 
 # exceptions
 # all example data should be provided
