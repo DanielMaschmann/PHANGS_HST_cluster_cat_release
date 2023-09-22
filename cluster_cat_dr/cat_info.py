@@ -12,27 +12,27 @@ class CatalogInfo:
     def __init__(self):
 
         # PHANGS-HST galaxy sample list
-        self.phangs_hst_target_list = ['ic1954', 'ic5332', 'ngc0628e', 'ngc0628c', 'ngc0685', 'ngc1087', 'ngc1097',
+        self.phangs_hst_target_list = ['ic1954', 'ic5332', 'ngc628e', 'ngc628c', 'ngc685', 'ngc1087', 'ngc1097',
                                        'ngc1300', 'ngc1317', 'ngc1365', 'ngc1385', 'ngc1433', 'ngc1512', 'ngc1559',
                                        'ngc1566', 'ngc1672', 'ngc1792', 'ngc2775', 'ngc2835', 'ngc2903', 'ngc3351',
                                        'ngc3621', 'ngc3627', 'ngc4254', 'ngc4298', 'ngc4303', 'ngc4321', 'ngc4535',
                                        'ngc4536', 'ngc4548', 'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689', 'ngc4826',
                                        'ngc5068', 'ngc5248', 'ngc6744', 'ngc7496']
         # specification of observed bands for each HST target
-        self.phangs_hst_obs_dict = {
-            'ngc0628':
-                {'folder_name': 'ngc628mosaic',
-                 'acs_wfc1_observed_bands': ['F435W', 'F658N', 'F814W'],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
-            'ngc0628e':
+        self.phangs_hst_obs_band_dict = {
+            'ngc628':
                 {'folder_name': 'ngc628mosaic',
                  'acs_wfc1_observed_bands': ['F435W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
-            'ngc0628c':
+            'ngc628e':
                 {'folder_name': 'ngc628mosaic',
-                 'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F658N', 'F814W'],
+                 'acs_wfc1_observed_bands': ['F435W', 'F814W'],
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
+            'ngc628c':
+                {'folder_name': 'ngc628mosaic',
+                 'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W']},
-            'ngc0685':
+            'ngc685':
                 {'folder_name': 'ngc685',
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
@@ -43,10 +43,10 @@ class CatalogInfo:
             'ngc1097':
                 {'folder_name': 'ngc1097mosaic',
                  'acs_wfc1_observed_bands': [],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F547M', 'F555W', 'F657N', 'F814W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc1300':
                 {'folder_name': 'ngc1300mosaic',
-                 'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F658N', 'F814W'],
+                 'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W']},
             'ngc1317':
                 {'folder_name': 'ngc1317',
@@ -82,7 +82,7 @@ class CatalogInfo:
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc1672':
                 {'folder_name': 'ngc1672mosaic',
-                 'acs_wfc1_observed_bands': ['F555W', 'F435W', 'F550M', 'F658N', 'F814W'],
+                 'acs_wfc1_observed_bands': ['F555W', 'F435W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
             'ngc1792':
                 {'folder_name': 'ngc1792',
@@ -103,7 +103,7 @@ class CatalogInfo:
             'ngc3351':
                 {'folder_name': 'ngc3351mosaic',
                  'acs_wfc1_observed_bands': [],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F547M', 'F555W', 'F657N', 'F814W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc3621':
                 {'folder_name': 'ngc3621mosaic',
                  'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
@@ -171,7 +171,7 @@ class CatalogInfo:
             'ngc6744':
                 {'folder_name': 'ngc6744mosaic',
                  'acs_wfc1_observed_bands': [],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F547M', 'F555W', 'F657N', 'F814W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc7496':
                 {'folder_name': 'ngc7496',
                  'acs_wfc1_observed_bands': [],
@@ -180,6 +180,120 @@ class CatalogInfo:
                 {'folder_name': 'ic5332',
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
+        }
+
+        # filter names from http://svo2.cab.inta-csic.es
+        self.hst_acs_wfc1_bands = ['FR388N', 'FR423N', 'F435W', 'FR459M', 'FR462N', 'F475W', 'F502N', 'FR505N', 'F555W',
+                                   'FR551N', 'F550M', 'FR601N', 'F606W', 'F625W', 'FR647M', 'FR656N', 'F658N', 'F660N',
+                                   'FR716N', 'POL_UV', 'POL_V', 'G800L', 'F775W', 'FR782N', 'F814W', 'FR853N', 'F892N',
+                                   'FR914M', 'F850LP', 'FR931N', 'FR1016N']
+        self.hst_wfc3_uvis2_bands = ['F218W', 'FQ232N', 'F225W', 'FQ243N', 'F275W', 'F280N', 'F300X', 'F336W', 'F343N',
+                                     'F373N', 'FQ378N', 'FQ387N', 'F390M', 'F390W', 'F395N', 'F410M', 'FQ422M', 'F438W',
+                                     'FQ436N', 'FQ437N', 'G280', 'F467M', 'F469N', 'F475W', 'F487N', 'FQ492N', 'F502N',
+                                     'F475X', 'FQ508N', 'F555W', 'F547M', 'FQ575N', 'F606W', 'F200LP', 'FQ619N',
+                                     'F621M', 'F625W', 'F631N', 'FQ634N', 'F645N', 'F350LP', 'F656N', 'F657N', 'F658N',
+                                     'F665N', 'FQ672N', 'FQ674N', 'F673N', 'F680N', 'F689M', 'FQ727N', 'FQ750N',
+                                     'F763M', 'F600LP', 'F775W', 'F814W', 'F845M', 'FQ889N', 'FQ906N', 'F850LP',
+                                     'FQ924N', 'FQ937N', 'F953N']
+        # band wavelength taken from
+        # http://svo2.cab.inta-csic.es/svo/theory/fps3/index.php?mode=browse&gname=HST&gname2=ACS_WFC&asttype=
+        self.hst_acs_wfc1_bands_mean_wave = {
+            'FR388N': 3881.71,
+            'FR423N': 4230.39,
+            'F435W': 4360.06,
+            'FR459M': 4592.76,
+            'FR462N': 4620.13,
+            'F475W': 4802.31,
+            'F502N': 5023.13,
+            'FR505N': 5050.39,
+            'F555W': 5397.60,
+            'FR551N': 5510.30,
+            'F550M': 5588.24,
+            'FR601N': 6010.50,
+            'F606W': 6035.73,
+            'F625W': 6352.46,
+            'FR647M': 6476.15,
+            'FR656N': 6560.36,
+            'F658N': 6584.10,
+            'F660N': 6599.50,
+            'FR716N': 7160.04,
+            'POL_UV': 7294.11,
+            'POL_V': 7523.49,
+            'G800L': 7704.08,
+            'F775W': 7730.77,
+            'FR782N': 7819.44,
+            'F814W': 8129.21,
+            'FR853N': 8528.80,
+            'F892N': 8915.37,
+            'FR914M': 9079.84,
+            'F850LP': 9080.26,
+            'FR931N': 9306.31,
+            'FR1016N': 10150.22,
+        }
+        self.hst_wfc3_uvis1_bands_mean_wave = {
+            'F218W': 2231.14,
+            'FQ232N': 2327.12,
+            'F225W': 2377.24,
+            'FQ243N': 2420.59,
+            'F275W': 2718.36,
+            'F280N': 2796.98,
+            'F300X': 2867.82,
+            'F336W': 3365.86,
+            'F343N': 3438.50,
+            'F373N': 3730.19,
+            'FQ378N': 3792.78,
+            'FQ387N': 3873.61,
+            'F390M': 3898.62,
+            'F390W': 3952.50,
+            'F395N': 3955.38,
+            'F410M': 4109.81,
+            'FQ422M': 4219.70,
+            'F438W': 4338.57,
+            'FQ436N': 4367.41,
+            'FQ437N': 4371.30,
+            'G280': 4628.43,
+            'F467M': 4683.55,
+            'F469N': 4688.29,
+            'F475W': 4827.71,
+            'F487N': 4871.54,
+            'FQ492N': 4933.83,
+            'F502N': 5009.93,
+            'F475X': 5076.23,
+            'FQ508N': 5091.59,
+            'F555W': 5388.55,
+            'F547M': 5459.04,
+            'FQ575N': 5756.92,
+            'F606W': 5999.27,
+            'F200LP': 6043.00,
+            'FQ619N': 6198.49,
+            'F621M': 6227.39,
+            'F625W': 6291.29,
+            'F631N': 6304.27,
+            'FQ634N': 6349.37,
+            'F645N': 6453.59,
+            'F350LP': 6508.00,
+            'F656N': 6561.54,
+            'F657N': 6566.93,
+            'F658N': 6585.64,
+            'F665N': 6656.23,
+            'FQ672N': 6717.13,
+            'FQ674N': 6730.58,
+            'F673N': 6766.27,
+            'F680N': 6880.13,
+            'F689M': 6885.92,
+            'FQ727N': 7275.84,
+            'FQ750N': 7502.54,
+            'F763M': 7623.09,
+            'F600LP': 7656.67,
+            'F775W': 7683.41,
+            'F814W': 8117.36,
+            'F845M': 8449.34,
+            'FQ889N': 8892.56,
+            'FQ906N': 9058.19,
+            'F850LP': 9207.49,
+            'FQ924N': 9247.91,
+            'FQ937N': 9372.90,
+            'F953N': 9531.11,
         }
 
         # Catalog info is a dictionary providing the final column name for the fits files of the final data release.
@@ -198,15 +312,15 @@ class CatalogInfo:
                       'doc_comment': 'A running index from 1 to N, where N is the total number of objects in the '
                                      'catalog. Objects sorted in order of increasing Y pixel value on image.',
                       'tab_comment': 'Running index from 1 to N for each individual target'},
-            'ID_PHANGS_CLUSTERS': {'col_name': 'phangs_cluster_id',
-                                   'unit': None,
-                                   'unit_str': 'int',
-                                   'doc_comment': 'Running PHANGS cluster ID. These values correspond to the candidate '
-                                                  'catalogs produced by the PHANGS-HST team. Objects sorted in order '
-                                                  'of increasing Y pixel value on image.',
-                                   'tab_comment': 'Running PHANGS cluster ID for candidate catalog '
-                                                  'cross-identification.'
-                                   },
+            'ID_PHANGS_CLUSTERS_v1p2': {'col_name': 'phangs_cluster_id',
+                                        'unit': None,
+                                        'unit_str': 'int',
+                                        'doc_comment': 'Running PHANGS cluster ID. These values correspond to the '
+                                                       'candidate catalogs produced by the PHANGS-HST team. Objects '
+                                                       'sorted in order of increasing Y pixel value on image.',
+                                        'tab_comment': 'Running PHANGS cluster ID for candidate catalog '
+                                                       'cross-identification.'
+                                        },
             'ID_PHANGS_ALLSOURCES': {'col_name': 'phangs_all_cluster_id',
                                      'unit': None,
                                      'unit_str': 'int',
@@ -609,24 +723,88 @@ class CatalogInfo:
                                                           'Possible values can be `YRO\', `UNCHANGED\', or `OGC\''
                                            },
 
-
         }
 
+        self.identifier_columns = ['INDEX', 'ID_PHANGS_CLUSTERS_v1p2',
+                                   # 'ID_PHANGS_ALLSOURCES',
+                                   'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC']
+
+        self.classification_columns = ['PHANGS_CLUSTER_CLASS_HUMAN', 'PHANGS_CLUSTER_CLASS_ML_VGG',
+                                       'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL']
+
+        self.example_photometry_columns = ['PHANGS_F275W_VEGA_TOT', 'PHANGS_F275W_VEGA_TOT_ERR',
+                                           'PHANGS_F275W_mJy_TOT', 'PHANGS_F275W_mJy_TOT_ERR']
+
+        self.detect_shape_columns = ['PHANGS_NON_DETECTION_FLAG', 'PHANGS_NO_COVERAGE_FLAG', 'PHANGS_CI']
+
         # list of columns entering table 1 (Observational properties)
-        self.tab1_columns = ['INDEX', 'ID_PHANGS_CLUSTERS', 'ID_PHANGS_ALLSOURCES',
-                             'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC',
-                             'PHANGS_CLUSTER_CLASS_HUMAN', 'PHANGS_CLUSTER_CLASS_ML_VGG',
-                             'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL',
-                             'PHANGS_F275W_VEGA_TOT', 'PHANGS_F275W_VEGA_TOT_ERR',
-                             'PHANGS_F275W_mJy_TOT', 'PHANGS_F275W_mJy_TOT_ERR',
-                             'PHANGS_NON_DETECTION_FLAG', 'PHANGS_NO_COVERAGE_FLAG',
-                             'PHANGS_CI']
+        self.tab1_columns = (self.identifier_columns + self.classification_columns + self.example_photometry_columns +
+                             self.detect_shape_columns)
 
         self.tab2_columns = ['INDEX', 'ID_PHANGS_CLUSTERS', 'ID_PHANGS_ALLSOURCES',
                              'PHANGS_AGE_MINCHISQ', 'PHANGS_AGE_MINCHISQ_ERR',
                              'PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR',
                              'PHANGS_EBV_MINCHISQ', 'PHANGS_EBV_MINCHISQ_ERR',
                              'PHANGS_REDUCED_MINCHISQ', 'PHANGS_SEDFIX_CATEGORY_DR4']
+
+    def get_obs_table_column_list(self, target):
+        """
+        returns list with all column names for the observational table
+
+        Parameters
+        ----------
+        target : str
+            Target name
+
+        Returns
+        -------
+        list : list
+        """
+
+        # get identifier and classification coulmns
+        columns_list = self.identifier_columns + self.classification_columns
+
+        # to add the photometry bands we need to access the individual bands for each target and put them in order
+        band_list = []
+        for band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
+            if band in (self.phangs_hst_obs_band_dict[target]['acs_wfc1_observed_bands'] +
+                        self.phangs_hst_obs_band_dict[target]['wfc3_uvis_observed_bands']):
+                band_list.append(band)
+        band_list = self.sort_band_name_list(band_list=band_list)
+
+        # create the photometry coulmn names
+        vega_column_names = []
+        mjy_column_names = []
+        for band in band_list:
+            vega_column_names.append('PHANGS_%s_VEGA_TOT' % band)
+            vega_column_names.append('PHANGS_%s_VEGA_TOT_ERR' % band)
+            mjy_column_names.append('PHANGS_%s_mJy_TOT' % band)
+            mjy_column_names.append('PHANGS_%s_mJy_TOT_ERR' % band)
+        columns_list += vega_column_names
+        columns_list += mjy_column_names
+        columns_list += self.detect_shape_columns
+
+        return columns_list
+
+    @staticmethod
+    def sort_band_name_list(band_list):
+        """
+        sorts a band list with increasing wavelength
+        Parameters
+        ----------
+        band_list : list
+
+        Returns
+        -------
+        sorted_band_list : list
+        """
+        wave_list = []
+        for band in band_list:
+            wave_list.append(int(band[1:-1]))
+
+        # sort wavelength bands
+        sort = np.argsort(wave_list)
+        return list(np.array(band_list)[sort])
 
     @staticmethod
     def split_line(line_string, max_length):
