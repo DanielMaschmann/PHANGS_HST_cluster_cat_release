@@ -33,7 +33,7 @@ class DataReleaseRoutines(CatalogInfo):
         Function to run all steps to create the PHANGs-HST cluster catalog data release
         """
         # create catalogs
-        for target in self.phangs_hst_target_list:
+        for target in self.phangs_hst_cluster_cat_target_list:
             # get artifact removal table
             table_artifact = self.get_artifact_cat(target=target)
 
@@ -58,7 +58,7 @@ class DataReleaseRoutines(CatalogInfo):
                             artifact_mask_table_ir += artifact_in_table_ir
                     print('number cross matched artefacts ', sum(artifact_mask_table_ir))
 
-                    # plot artifacts !!!
+                    # plot artifacts
                     # TBD !!!!!
 
                     # apply artifact mask
@@ -128,7 +128,6 @@ class DataReleaseRoutines(CatalogInfo):
                 obs_table = hstack([obs_table, column])
 
         return obs_table
-
 
     def get_ir_cat(self, target, classify, cl_class):
         """

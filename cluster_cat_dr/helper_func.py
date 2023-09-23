@@ -1,13 +1,55 @@
 """
 This script gathers function to support the HST catalog release
 """
+
+import os
+from pathlib import Path
 import warnings
 
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from astropy.io import fits
 import astropy.units as u
-from astropy.coordinates import SkyCoord
+
+
+def identify_file_in_folder(folder_path, str_in_file_name_1, str_in_file_name_2=None):
+    """
+    Identify a file inside a folder that contains a specific string.
+
+    Parameters
+    ----------
+    folder_path : Path or str
+    str_in_file_name_1 : str
+    str_in_file_name_2 : str
+
+    Returns
+    -------
+    file_name : Path
+    """
+
+    if str_in_file_name_2 is None:
+        str_in_file_name_2 = str_in_file_name_1
+
+    if isinstance(folder_path, str):
+        folder_path = Path(folder_path)
+    identified_files_1 = list(filter(lambda x: str_in_file_name_1 in x, os.listdir(folder_path)))
+
+    identified_files_2 = list(filter(lambda x: str_in_file_name_2 in x, os.listdir(folder_path)))
+
+    if not identified_files_1 and not identified_files_2:
+        raise FileNotFoundError('The data file containing the string %s or %s does not exist.' %
+                                (str_in_file_name_1, str_in_file_name_2))
+    elif len(identified_files_1) > 1:
+        raise FileExistsError('There are more than one data files containing the string %s .' % str_in_file_name_1)
+    elif len(identified_files_2) > 1:
+        raise FileExistsError('There are more than one data files containing the string %s .' % str_in_file_name_2)
+    else:
+        if not identified_files_2:
+            return folder_path / str(identified_files_1[0])
+        if not identified_files_1:
+            return folder_path / str(identified_files_2[0])
+        if identified_files_1 and identified_files_2:
+            return folder_path / str(identified_files_1[0])
 
 
 def load_img(file_name, hdu_number=0):
@@ -76,5 +118,3 @@ def get_img_cutout(img, wcs, coord, cutout_size):
         cut_out.data = None
         cut_out.wcs = None
         return cut_out
-
-
