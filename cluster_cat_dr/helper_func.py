@@ -118,3 +118,5 @@ def get_img_cutout(img, wcs, coord, cutout_size):
         cut_out.data = None
         cut_out.wcs = None
         return cut_out
+
+

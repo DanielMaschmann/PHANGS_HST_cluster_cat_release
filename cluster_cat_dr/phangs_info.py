@@ -28,38 +28,44 @@ class PhangsObsInfo:
                                            'ngc4535', 'ngc4536', 'ngc4548', 'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689',
                                            'ngc4826', 'ngc5068', 'ngc5248', 'ngc6744', 'ngc7496']
         # Phangs target with existing NIRCAM observations
-        self.phangs_nircam_obs_target_list = ['ngc0628', 'ngc7496', 'ngc1365']
+        self.phangs_nircam_obs_target_list = ['ngc0628', 'ngc1087', 'ngc1300', 'ngc1365', 'ngc1385', 'ngc1433',
+                                              'ngc1512', 'ngc1566', 'ngc1672', 'ngc2835', 'ngc3351', 'ngc3627', 'ngc4254',
+                                              'ngc4303', 'ngc4321', 'ngc4535', 'ngc5068', 'ngc7496']
         # Phangs target with existing MIRI observations
-        self.phangs_miri_obs_target_list = ['ngc0628', 'ngc7496', 'ngc1365']
+        self.phangs_miri_obs_target_list = ['ic5332', 'ngc0628', 'ngc1087', 'ngc1300', 'ngc1365', 'ngc1385', 'ngc1433',
+                                            'ngc1512', 'ngc1566', 'ngc1672', 'ngc2835', 'ngc3351', 'ngc3627', 'ngc4254',
+                                            'ngc4303', 'ngc4321', 'ngc4535', 'ngc5068', 'ngc7496']
 
+        # # targets for which a cluster catalog was created
+        # self.phangs_hst_cluster_cat_target_list = ['ic1954', 'ic5332', 'ngc0628e', 'ngc0628c', 'ngc0685', 'ngc1087',
+        #                                            'ngc1097', 'ngc1300', 'ngc1317', 'ngc1365', 'ngc1385', 'ngc1433',
+        #                                            'ngc1512', 'ngc1559', 'ngc1566', 'ngc1672', 'ngc1792', 'ngc2775',
+        #                                            'ngc2835', 'ngc2903', 'ngc3351', 'ngc3621', 'ngc3627', 'ngc4254',
+        #                                            'ngc4298', 'ngc4303', 'ngc4321', 'ngc4535', 'ngc4536', 'ngc4548',
+        #                                            'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689', 'ngc4826', 'ngc5068',
+        #                                            'ngc5248', 'ngc6744', 'ngc7496']
         # targets for which a cluster catalog was created
-        self.phangs_hst_cluster_cat_target_list = ['ic1954', 'ic5332', 'ngc628e', 'ngc628c', 'ngc685', 'ngc1087',
-                                                   'ngc1097', 'ngc1300', 'ngc1317', 'ngc1365', 'ngc1385', 'ngc1433',
-                                                   'ngc1512', 'ngc1559', 'ngc1566', 'ngc1672', 'ngc1792', 'ngc2775',
-                                                   'ngc2835', 'ngc2903', 'ngc3351', 'ngc3621', 'ngc3627', 'ngc4254',
-                                                   'ngc4298', 'ngc4303', 'ngc4321', 'ngc4535', 'ngc4536', 'ngc4548',
-                                                   'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689', 'ngc4826', 'ngc5068',
-                                                   'ngc5248', 'ngc6744', 'ngc7496']
+        self.phangs_hst_cluster_cat_target_list = ['ngc1365']
 
-        self.hst_ver_folder_names = {'v1': 'v1.0', 'v0.9': 'v0.9'}
-        self.nircam_ver_folder_names = {'v0p4p2': 'v0p4p2', 'v0p7p3': 'v0p7p3_anchored'}
-        self.miri_ver_folder_names = {'v0p5': 'v0p5_miri', 'v0p6': 'v0p6_miri'}
+        self.hst_ver_folder_names = {'v1.0': 'v1.0'}
+        self.nircam_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1'}
+        self.miri_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1'}
 
         # specification of observed bands for each HST target
         self.phangs_hst_obs_band_dict = {
-            'ngc628':
+            'ngc0628':
                 {'folder_name': 'ngc628mosaic',
                  'acs_wfc1_observed_bands': ['F435W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
-            'ngc628e':
+            'ngc0628e':
                 {'folder_name': 'ngc628mosaic',
                  'acs_wfc1_observed_bands': ['F435W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
-            'ngc628c':
+            'ngc0628c':
                 {'folder_name': 'ngc628mosaic',
                  'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W']},
-            'ngc685':
+            'ngc0685':
                 {'folder_name': 'ngc685',
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
@@ -211,29 +217,45 @@ class PhangsObsInfo:
         # specification of observed bands for each NIRCAM target
         self.nircam_targets = {
             'ngc0628': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1087': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1300': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1365': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1385': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1433': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1512': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1566': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc1672': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc3627': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc4303': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc4321': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc4535': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc5068': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
-            'ngc7496': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']}
+            'ngc1087': {'folder_name': 'ngc1087', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1300': {'folder_name': 'ngc1300', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1365': {'folder_name': 'ngc1365', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1385': {'folder_name': 'ngc1385', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1433': {'folder_name': 'ngc1433', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1512': {'folder_name': 'ngc1512', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1566': {'folder_name': 'ngc1566', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc1672': {'folder_name': 'ngc1672', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc2835': {'folder_name': 'ngc2835', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc3351': {'folder_name': 'ngc3351', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc3627': {'folder_name': 'ngc3627', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc4254': {'folder_name': 'ngc4254', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc4303': {'folder_name': 'ngc4303', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc4321': {'folder_name': 'ngc4321', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc4535': {'folder_name': 'ngc4535', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc5068': {'folder_name': 'ngc5068', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
+            'ngc7496': {'folder_name': 'ngc7496', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
         }
         # specification of observed bands for each MIRI target
         self.miri_targets = {
-            'ngc0628':
-                {'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
-            'ngc7496':
-                {'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
-            'ngc1365':
-                {'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ic5332': {'folder_name': 'ic5332', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc0628': {'folder_name': 'ngc0628', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1087': {'folder_name': 'ngc1087', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1300': {'folder_name': 'ngc1300', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1365': {'folder_name': 'ngc1365', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1385': {'folder_name': 'ngc1385', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1433': {'folder_name': 'ngc1433', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1512': {'folder_name': 'ngc1512', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1566': {'folder_name': 'ngc1566', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc1672': {'folder_name': 'ngc1672', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc2835': {'folder_name': 'ngc2835', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc3351': {'folder_name': 'ngc3351', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc3627': {'folder_name': 'ngc3627', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc4254': {'folder_name': 'ngc4254', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc4303': {'folder_name': 'ngc4303', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc4321': {'folder_name': 'ngc4321', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc4535': {'folder_name': 'ngc4535', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc5068': {'folder_name': 'ngc5068', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
+            'ngc7496': {'folder_name': 'ngc7496', 'observed_bands': ['F770W', 'F1000W', 'F1130W', 'F2100W']},
         }
 
 
