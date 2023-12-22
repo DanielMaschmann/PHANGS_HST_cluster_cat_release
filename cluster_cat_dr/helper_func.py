@@ -11,6 +11,7 @@ from astropy.wcs import WCS
 from astropy.io import fits
 import astropy.units as u
 
+import numpy as np
 
 def identify_file_in_folder(folder_path, str_in_file_name_1, str_in_file_name_2=None):
     """
@@ -79,6 +80,8 @@ def load_img(file_name, hdu_number=0):
     wcs = WCS(header)
     # load data
     data = hdu[hdu_number].data
+    # close hdu again
+    hdu.close()
     return data, header, wcs
 
 
@@ -120,3 +123,24 @@ def get_img_cutout(img, wcs, coord, cutout_size):
         return cut_out
 
 
+def transform_world2pix_scale(length_in_arcsec, wcs, dim=0):
+    """ Function to get the pixel length of a length in arcseconds
+    Parameters
+    ----------
+    length_in_arcsec : float
+        length
+    wcs : ``astropy.wcs.WCS``
+        astropy world coordinate system object describing the parameter image
+    dim : int, 0 or 1
+        specifys the dimension 0 for ra and 1 for dec. This should be however always the same values...
+
+    Returns
+    -------
+    length_in_pixel : tuple
+        length in pixel along ra and dec
+    """
+
+    return (length_in_arcsec*u.arcsec).to(u.deg) / wcs.proj_plane_pixel_scales()[dim]
+
+def points_in_hull(p, hull, tol=1e-12):
+    return np.all(hull.equations[:,:-1] @ p.T + np.repeat(hull.equations[:,-1][None,:], len(p), axis=0).T <= tol, 0)

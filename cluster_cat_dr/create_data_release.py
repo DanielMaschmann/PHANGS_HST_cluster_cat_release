@@ -28,6 +28,13 @@ if config_dict['artifact_removal_flag'] and not os.path.isdir(config_dict['path2
 # Create object of DataReleaseRoutine class and give it all variables from the config_dict
 data_release_ojt = DataReleaseRoutines(**config_dict)
 
+# create the final data release (all the catalogues)
 data_release_ojt.create_final_data_release()
 
+# create documentaion
+data_release_ojt.create_documentation()
 
+data_release_ojt.create_hull_files()
+
+# data_release_ojt.print_content_table(table_name='tab2', max_length_description=70)
+data_release_ojt.print_content_table(table_name='tab1', max_length_description=70)

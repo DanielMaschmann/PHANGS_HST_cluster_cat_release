@@ -28,7 +28,7 @@ class PhangsObsInfo:
                                            'ngc4535', 'ngc4536', 'ngc4548', 'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689',
                                            'ngc4826', 'ngc5068', 'ngc5248', 'ngc6744', 'ngc7496']
         # Phangs target with existing NIRCAM observations
-        self.phangs_nircam_obs_target_list = ['ngc0628', 'ngc1087', 'ngc1300', 'ngc1365', 'ngc1385', 'ngc1433',
+        self.phangs_nircam_obs_target_list = ['ic5332', 'ngc0628', 'ngc1087', 'ngc1300', 'ngc1365', 'ngc1385', 'ngc1433',
                                               'ngc1512', 'ngc1566', 'ngc1672', 'ngc2835', 'ngc3351', 'ngc3627', 'ngc4254',
                                               'ngc4303', 'ngc4321', 'ngc4535', 'ngc5068', 'ngc7496']
         # Phangs target with existing MIRI observations
@@ -36,20 +36,18 @@ class PhangsObsInfo:
                                             'ngc1512', 'ngc1566', 'ngc1672', 'ngc2835', 'ngc3351', 'ngc3627', 'ngc4254',
                                             'ngc4303', 'ngc4321', 'ngc4535', 'ngc5068', 'ngc7496']
 
-        # # targets for which a cluster catalog was created
-        # self.phangs_hst_cluster_cat_target_list = ['ic1954', 'ic5332', 'ngc0628e', 'ngc0628c', 'ngc0685', 'ngc1087',
-        #                                            'ngc1097', 'ngc1300', 'ngc1317', 'ngc1365', 'ngc1385', 'ngc1433',
-        #                                            'ngc1512', 'ngc1559', 'ngc1566', 'ngc1672', 'ngc1792', 'ngc2775',
-        #                                            'ngc2835', 'ngc2903', 'ngc3351', 'ngc3621', 'ngc3627', 'ngc4254',
-        #                                            'ngc4298', 'ngc4303', 'ngc4321', 'ngc4535', 'ngc4536', 'ngc4548',
-        #                                            'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689', 'ngc4826', 'ngc5068',
-        #                                            'ngc5248', 'ngc6744', 'ngc7496']
         # targets for which a cluster catalog was created
-        self.phangs_hst_cluster_cat_target_list = ['ngc1365']
+        self.phangs_hst_cluster_cat_target_list = ['ic1954', 'ic5332', 'ngc0628e', 'ngc0628c', 'ngc0685', 'ngc1087',
+                                                   'ngc1097', 'ngc1300', 'ngc1317', 'ngc1365', 'ngc1385', 'ngc1433',
+                                                   'ngc1512', 'ngc1559', 'ngc1566', 'ngc1672', 'ngc1792', 'ngc2775',
+                                                   'ngc2835', 'ngc2903', 'ngc3351', 'ngc3621', 'ngc3627', 'ngc4254',
+                                                   'ngc4298', 'ngc4303', 'ngc4321', 'ngc4535', 'ngc4536', 'ngc4548',
+                                                   'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689', 'ngc4826', 'ngc5068',
+                                                   'ngc5248', 'ngc6744', 'ngc7496']
 
         self.hst_ver_folder_names = {'v1.0': 'v1.0'}
-        self.nircam_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1'}
-        self.miri_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1'}
+        self.nircam_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1', 'v0p9p2': 'v0p9p2'}
+        self.miri_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1', 'v0p9p2': 'v0p9p2'}
 
         # specification of observed bands for each HST target
         self.phangs_hst_obs_band_dict = {
@@ -58,11 +56,11 @@ class PhangsObsInfo:
                  'acs_wfc1_observed_bands': ['F435W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
             'ngc0628e':
-                {'folder_name': 'ngc628mosaic',
+                {'folder_name': 'ngc628e',
                  'acs_wfc1_observed_bands': ['F435W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
             'ngc0628c':
-                {'folder_name': 'ngc628mosaic',
+                {'folder_name': 'ngc628c',
                  'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W']},
             'ngc0685':
@@ -99,6 +97,10 @@ class PhangsObsInfo:
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc1433':
                 {'folder_name': 'ngc1433',
+                 'acs_wfc1_observed_bands': [],
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
+            'ngc1510':
+                {'folder_name': 'ngc1512mosaic',
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc1512':
@@ -146,7 +148,7 @@ class PhangsObsInfo:
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc4254':
-                {'folder_name': 'ngc4254mosaic',
+                {'folder_name': 'ngc4254',
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
             'ngc4298':
@@ -216,6 +218,7 @@ class PhangsObsInfo:
         }
         # specification of observed bands for each NIRCAM target
         self.nircam_targets = {
+            'ic5332': {'folder_name': 'ic5332', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
             'ngc0628': {'folder_name': 'ngc0628', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
             'ngc1087': {'folder_name': 'ngc1087', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},
             'ngc1300': {'folder_name': 'ngc1300', 'observed_bands': ['F200W', 'F300M', 'F335M', 'F360M']},

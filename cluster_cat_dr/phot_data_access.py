@@ -9,8 +9,8 @@ import numpy as np
 from astropy.coordinates import SkyCoord
 from scipy.constants import c as speed_of_light
 
-import helper_func
-import phangs_info
+from cluster_cat_dr import helper_func
+from cluster_cat_dr import phangs_info
 
 
 class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
@@ -19,7 +19,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
     """
 
     def __init__(self, target_name=None, hst_data_path=None, nircam_data_path=None, miri_data_path=None,
-                 hst_data_ver='v1', nircam_data_ver='v0p4p2', miri_data_ver='v0p5'):
+                 hst_data_ver='v1.0', nircam_data_ver='v0p4p2', miri_data_ver='v0p5'):
         """
         Parameters
         ----------
@@ -42,12 +42,26 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         super().__init__()
 
         self.target_name = target_name
-        if (self.target_name not in self.phangs_galaxy_list) & (self.target_name is not None):
+        if (((self.target_name not in self.phangs_galaxy_list) &
+            (self.target_name not in self.phangs_hst_obs_target_list) &
+            (self.target_name not in self.phangs_nircam_obs_target_list) &
+            (self.target_name not in self.phangs_miri_obs_target_list)) &
+                (self.target_name is not None)):
             raise AttributeError('The target %s is not in the PHANGS photometric sample or has not been added to '
                                  'the current package version' % self.target_name)
-        self.hst_data_path = Path(hst_data_path)
-        self.nircam_data_path = Path(nircam_data_path)
-        self.miri_data_path = Path(miri_data_path)
+
+        if hst_data_path is None:
+            self.hst_data_path = None
+        else:
+            self.hst_data_path = Path(hst_data_path)
+        if nircam_data_path is None:
+            self.nircam_data_path = None
+        else:
+            self.nircam_data_path = Path(nircam_data_path)
+        if miri_data_path is None:
+            self.miri_data_path = None
+        else:
+            self.miri_data_path = Path(miri_data_path)
 
         self.hst_data_ver = hst_data_ver
         self.nircam_data_ver = nircam_data_ver
@@ -83,6 +97,39 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             hst_data_ver_str = self.hst_data_ver
         ending_of_band_file_1 = '%s_%s_exp-drc-sci.fits' % (band.lower(), hst_data_ver_str)
         ending_of_band_file_2 = '%s_exp_drc_sci.fits' % (band.lower())
+
+        if file_name is None:
+            return helper_func.identify_file_in_folder(folder_path=hst_data_folder,
+                                                       str_in_file_name_1=ending_of_band_file_1,
+                                                       str_in_file_name_2=ending_of_band_file_2)
+        else:
+            return Path(hst_data_folder) / Path(file_name)
+
+    def get_hst_exp_time_file_name(self, band, hst_data_folder=None, file_name=None):
+        """
+
+        Parameters
+        ----------
+        band : str
+        hst_data_folder : str
+        file_name : str
+
+        Returns
+        -------
+        data_file_path : Path
+        """
+        if (band not in self.hst_acs_wfc1_bands) & (band not in self.hst_wfc3_uvis2_bands):
+            raise AttributeError('The band <%s> is not in the list of possible HST bands.' % band)
+
+        if hst_data_folder is None:
+            hst_data_folder = (self.hst_data_path / self.hst_ver_folder_names[self.hst_data_ver] /
+                               self.phangs_hst_obs_band_dict[self.target_name]['folder_name'])
+        if self.hst_data_ver == 'v1.0':
+            hst_data_ver_str = 'v1'
+        else:
+            hst_data_ver_str = self.hst_data_ver
+        ending_of_band_file_1 = '%s_%s_exp-drc-wht.fits' % (band.lower(), hst_data_ver_str)
+        ending_of_band_file_2 = '%s_exp_drc_wht.fits' % (band.lower())
 
         if file_name is None:
             return helper_func.identify_file_in_folder(folder_path=hst_data_folder,
@@ -380,7 +427,8 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             for band in self.nircam_bands:
                 if band in self.nircam_targets[self.target_name]['observed_bands']:
                     band_list.append(band)
-        return self.sort_band_list(band_list=band_list)
+            band_list = self.sort_band_list(band_list=band_list)
+        return band_list
 
     def get_miri_band_list(self):
         """
@@ -394,7 +442,8 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             for band in self.miri_bands:
                 if band in self.miri_targets[self.target_name]['observed_bands']:
                     band_list.append(band)
-        return self.sort_band_list(band_list=band_list)
+            band_list = self.sort_band_list(band_list=band_list)
+        return band_list
 
     def get_hst_nircam_miri_band_list(self):
         """
@@ -688,3 +737,10 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         # sort wavelength bands
         sort = np.argsort(wave_list)
         return list(np.array(band_list)[sort])
+
+    def get_hst_median_exp_time(self, band):
+
+        exp_file_name = self.get_hst_exp_time_file_name(band=band)
+        # print(exp_file_name)
+        data, header, wcs = helper_func.load_img(file_name=exp_file_name)
+        return np.nanmedian(data[data != 0])

@@ -23,33 +23,52 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
         self.cat_info = {
 
             # cluster identifier
-            'INDEX': {'col_name': 'index',
+            'INDEX': {'col_name': 'INDEX',
+                      # 'col_name': 'index',
                       'unit': None,
                       'unit_str': 'int',
                       'doc_comment': 'A running index from 1 to N, where N is the total number of objects in the '
-                                     'catalog. Objects sorted in order of increasing Y pixel value on image.',
+                                     'catalog. Objects are sorted in order of increasing Y pixel value on image.',
                       'tab_comment': 'Running index from 1 to N for each individual target'},
-            'ID_PHANGS_CLUSTERS_v1p2': {'col_name': 'phangs_cluster_id',
+
+            'id_phangs_cluster': {  # 'col_name': 'id_phangs_cluster',
+                                  'col_name': 'ID_PHANGS_CLUSTER',
+                                  'unit': None,
+                                  'unit_str': 'int',
+                                  'doc_comment': 'PHANGS cluster ID for each individual object classified as '
+                                                 'class 1,2 or 3, ordered by '
+                                                 'increasing Y pixel coordinate',
+                                  'tab_comment': 'PHANGS cluster ID for each individual object classified as '
+                                                 'class 1,2 or 3, ordered by '
+                                                 'increasing Y pixel coordinate'},
+
+
+            'ID_PHANGS_CLUSTERS_v1p2': {# 'col_name': 'ID_PHANGS_CLUSTERS_v1p2',
+                                        # 'col_name': 'id_phangs_candidate',
+                                        'col_name': 'ID_PHANGS_CANDIDATE',
                                         'unit': None,
                                         'unit_str': 'int',
-                                        'doc_comment': 'Running PHANGS cluster ID. These values correspond to the '
+                                        'doc_comment': 'Running PHANGS candidate ID. These values correspond to the '
                                                        'candidate catalogs produced by the PHANGS-HST team. Objects '
-                                                       'sorted in order of increasing Y pixel value on image.',
-                                        'tab_comment': 'Running PHANGS cluster ID for candidate catalog '
-                                                       'cross-identification.'
+                                                       'are sorted in order of increasing Y pixel value on image.',
+                                        'tab_comment': 'ID in the PHANGS-HST candidate catalog for each '
+                                                       'individual target, for cross-identification.'
                                         },
-            'ID_PHANGS_ALLSOURCES': {'col_name': 'phangs_all_cluster_id',
+            'ID_PHANGS_ALLSOURCES_v1p2': {# 'col_name': 'ID_PHANGS_ALLSOURCES',
+                                     # 'col_name': 'id_phangs_allsource',
+                                     'col_name': 'ID_PHANGS_ALLSOURCES',
                                      'unit': None,
                                      'unit_str': 'int',
-                                     'doc_comment': 'Running PHANGS cluster ID. These values correspond to the '
+                                     'doc_comment': 'Running PHANGS source ID. These values correspond to the '
                                                     'initial detection catalogs produced by the PHANGS-HST team. '
-                                                    'Objects sorted in order of increasing Y pixel value on image.',
-                                     'tab_comment': 'Running PHANGS cluster ID for initial source detection catalog '
-                                                    'cross-identification.'
+                                                    'Objects are sorted in order of increasing Y pixel value on image.',
+                                     'tab_comment': 'ID in the initial PHANGS-HST “all-source” detection catalog '
+                                                    'for each individual target, for cross-identification.'
                                      },
 
             # coordinates of each cluster
-            'PHANGS_X': {'col_name': 'x_pix_coord',
+            'PHANGS_X': {'col_name': 'PHANGS_X',
+                         # 'col_name': 'x_pix_coord',
                          'unit': None,
                          'unit_str': 'pix',
                          'doc_comment': 'X pixel coordinate on HST image. Scale = 0.03962 arcsec/pixel. '
@@ -58,7 +77,8 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                         '(e.g., IRAF, ds9).',
                          'tab_comment': 'X coordinates on HST X-pixel grid (0...n-1). Scale = 0.03962 arcsec/pixel.'
                          },
-            'PHANGS_Y': {'col_name': 'y_pix_coord',
+            'PHANGS_Y': {'col_name': 'PHANGS_Y',
+                         # 'col_name': 'y_pix_coord',
                          'unit': None,
                          'unit_str': 'pix',
                          'doc_comment': 'Y pixel coordinate on HST image. Scale = 0.03962 arcsec/pixel. '
@@ -68,13 +88,15 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                          'tab_comment': 'Y coordinates on HST Y-pixel grid (0...n-1). Scale = 0.03962 arcsec/pixel.'
                          },
 
-            'PHANGS_RA': {'col_name': 'ra',
+            'PHANGS_RA': {'col_name': 'PHANGS_RA',
+                          # 'col_name': 'ra',
                           'unit': u.deg,
                           'unit_str': 'deg',
                           'doc_comment': 'J2000 Right ascension, ICRS frame, calibrated against selected Gaia sources.',
                           'tab_comment': 'J2000 Right ascension, ICRS frame, calibrated against selected Gaia sources.'
                           },
-            'PHANGS_DEC': {'col_name': 'dec',
+            'PHANGS_DEC': {'col_name': 'PHANGS_DEC',
+                           # 'col_name': 'dec',
                            'unit': u.deg,
                            'unit_str': 'deg',
                            'doc_comment': 'J2000 Declination, ICRS frame, calibrated against selected Gaia sources.',
@@ -82,20 +104,25 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                            },
 
             # Morphological Classification
-            'PHANGS_CLUSTER_CLASS_HUMAN': {'col_name': 'cluster_class_human',
+            'PHANGS_CLUSTER_CLASS_HUMAN': {'col_name': 'PHANGS_CLUSTER_CLASS_HUMAN',
+                                           # 'col_name': 'class_human',
                                            'unit': None,
                                            'unit_str': 'int',
                                            'doc_comment': 'Human visual classification determined by coauthor '
                                                           'Brad Whitmore (BCW). Further details in '
                                                           'Whitmore et al. (2021) (2021MNRAS.506.5294W).'
                                                           'The classification is encoded in integers: '
-                                                          '1 and 2 for class 1 and 2, respectively and '
-                                                          '3 for class 3 compact associations. ',
+                                                          '1 and 2 for class 1 and 2 compact clusters, respectively and '
+                                                          '3 for class 3 compact associations. '
+                                                          'Intengers > 3 are artefacts, see above.'
+                                                          'Classification numbers for artefacts are described above',
                                            'tab_comment': 'Cluster class assigned through visual inspection. '
-                                                          'Integers 1, 2 and 3 denotes class 1, 2 and '
-                                                          'class 3 compact associations, respectively.'
+                                                          'Integers 1 and 2 represent C1 and C2 compact clusters. '
+                                                          '3 stands for C3 compact associations. '
+                                                          'Intengers > 3 are artefacts.'
                                            },
-            'PHANGS_CLUSTER_CLASS_ML_VGG': {'col_name': 'cluster_class_ml',
+            'PHANGS_CLUSTER_CLASS_ML_VGG': {'col_name': 'PHANGS_CLUSTER_CLASS_ML_VGG',
+                                            # 'col_name': 'class_ml_vgg',
                                             'unit': None,
                                             'unit_str': 'int',
                                             'doc_comment': 'Classification determined by VGG neural network model of '
@@ -110,12 +137,16 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                            'The cluster class was determined from 10 randomly '
                                                            'initialized models. The values are the same as for '
                                                            '`cluster_class_human\': Integers 1, 2 and 3 denotes '
-                                                           'class 1, 2 and class 3 compact associations, respectively.',
+                                                           'class 1, 2 and class 3 compact associations, respectively. '
+                                                           'Intengers > 3 are artefacts, see above.'
+                                                           ' Classification numbers for artefacts are described above',
                                             'tab_comment': 'Cluster class determined by VGG neural network. '
-                                                           'Integer 1, 2 and 3 denotes class 1, 2 and '
-                                                           'class 3 compact associations, respectively.'
+                                                           'Integers 1 and 2 represent C1 and C2 compact clusters. '
+                                                           '3 stands for C3 compact associations. '
+                                                           'Intengers > 3 are artefacts.'
                                             },
-            'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL': {'col_name': 'cluster_class_ml_qual',
+            'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL': {'col_name': 'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL',
+                                                 # 'col_name': 'class_ml_vgg_qual',
                                                  'unit': None,
                                                  'unit_str': 'float',
                                                  'doc_comment': 'Quality value providing accuracy of the VGG neural '
@@ -129,32 +160,77 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                                 'frequency of the mode among the 10 randomly '
                                                                 'initialized models.'
                                                  },
-
+            'class_ml_vgg_corr': {# 'col_name': 'class_ml_vgg_corr',
+                                  'col_name': 'PHANGS_CLUSTER_CLASS_ML_VGG_CORR',
+                                  'unit': None,
+                                  'unit_str': 'int',
+                                  'doc_comment': 'Same classification as in column `cluster_class_ml\' '
+                                                 'but corrected for human identified artefacts. '
+                                                 'Thus, all object classes identified as artefacts in column '
+                                                 '`class_human\' are replaced.',
+                                  'tab_comment': ' '
+                                  },
             # Photometry
-            # Vega magnitudes
-            'PHANGS_F275W_VEGA_TOT': {'col_name': 'f275w_vega_tot',
+            # placeholder example
+            'PHANGS_[BAND]_VEGA_TOT': {'col_name': 'PHANGS_[BAND]_VEGA',
                                       'unit': u.mag,
                                       'unit_str': 'mag',
-                                      'doc_comment': 'WFC3 f275w (NUV-band) total vega magnitude, MW foreground '
-                                                     'reddening and aperture corrected. For more details on the '
-                                                     'aperture correction see '
-                                                     'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
-                                                     'source is not covered by HST filter. See also the '
-                                                     '`no_coverage_flag\' column.',
-                                      'tab_comment': 'WFC3 f275w (NUV-band) total vega magnitude, MW foreground '
+                                      'doc_comment': '',
+                                      'tab_comment': 'HST band apparent vega magnitude, MW foreground '
                                                      'reddening and aperture corrected. Set to -9999 if source is not '
                                                      'covered by HST filter.'
                                       },
-            'PHANGS_F275W_VEGA_TOT_ERR': {'col_name': 'f275w_vega_tot_err',
+            'PHANGS_[BAND]_VEGA_TOT_ERR': {'col_name': 'PHANGS_[BAND]_VEGA_ERR',
+                                          # 'col_name': 'f275w_vega_err',
                                           'unit': u.mag,
                                           'unit_str': 'mag',
-                                          'doc_comment': 'Uncertainty of `f275w_vega_tot\'',
-                                          'tab_comment': 'Uncertainty of `f275w_vega_tot\''
+                                          'doc_comment': 'Uncertainty of `[BAND]_VEGA\'',
+                                          'tab_comment': 'Uncertainty of `[BAND]_VEGA\''
                                           },
-            'PHANGS_F336W_VEGA_TOT': {'col_name': 'f336w_vega_tot',
+            'PHANGS_[BAND]_mJy_TOT': {'col_name': 'PHANGS_[BAND]_mJy',
+                                     # 'col_name': 'f275w_mJy',
+                                     'unit': u.mJy,
+                                     'unit_str': 'mJy',
+                                     'doc_comment': '',
+                                     'tab_comment': 'HST band flux in mJy, MW foreground '
+                                                    'reddening and aperture corrected. Set to -9999 if source is not '
+                                                    'covered by HST filter.'
+                                     },
+            'PHANGS_[BAND]_mJy_TOT_ERR': {'col_name': 'PHANGS_[BAND]_mJy_ERR',
+                                         # 'col_name': 'f275w_mJy_err',
+                                         'unit': u.mJy,
+                                         'unit_str': 'mJy',
+                                         'doc_comment': 'Uncertainty of `[BAND]_mJy\'',
+                                         'tab_comment': 'Uncertainty of `[BAND]_mJy\''
+                                         },
+
+            # Vega magnitudes
+            'PHANGS_F275W_VEGA_TOT': {'col_name': 'PHANGS_F275W_VEGA',
+                                      # 'col_name': 'f275w_vega',
                                       'unit': u.mag,
                                       'unit_str': 'mag',
-                                      'doc_comment': 'WFC3 f336w (U-band) total vega magnitude, MW foreground '
+                                      'doc_comment': 'WFC3 f275w (NUV-band) apparent apparent vega magnitude, MW foreground '
+                                                     'reddening and aperture corrected. For more details on the '
+                                                     'aperture correction see '
+                                                     'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
+                                                     'source is not covered by HST filter. See also the '
+                                                     '`no_coverage_flag\' column.',
+                                      'tab_comment': 'WFC3 f275w (NUV-band) apparent vega magnitude, MW foreground '
+                                                     'reddening and aperture corrected. Set to -9999 if source is not '
+                                                     'covered by HST filter.'
+                                      },
+            'PHANGS_F275W_VEGA_TOT_ERR': {'col_name': 'PHANGS_F275W_VEGA_ERR',
+                                          # 'col_name': 'f275w_vega_err',
+                                          'unit': u.mag,
+                                          'unit_str': 'mag',
+                                          'doc_comment': 'Uncertainty of `F275W_VEGA\'',
+                                          'tab_comment': 'Uncertainty of `F275W_VEGA\''
+                                          },
+            'PHANGS_F336W_VEGA_TOT': {'col_name': 'PHANGS_F336W_VEGA',
+                                      # 'col_name': 'f336w_vega',
+                                      'unit': u.mag,
+                                      'unit_str': 'mag',
+                                      'doc_comment': 'WFC3 f336w (U-band) apparent vega magnitude, MW foreground '
                                                      'reddening and aperture corrected. For more details on the '
                                                      'aperture correction see '
                                                      'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
@@ -162,54 +238,61 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                      '`no_coverage_flag\' column.',
                                       'tab_comment': None
                                       },
-            'PHANGS_F336W_VEGA_TOT_ERR': {'col_name': 'f336w_vega_tot_err',
+            'PHANGS_F336W_VEGA_TOT_ERR': {'col_name': 'PHANGS_F336W_VEGA_ERR',
+                                          # 'col_name': 'f336w_vega_err',
                                           'unit': u.mag,
                                           'unit_str': 'mag',
-                                          'doc_comment': 'Uncertainty of `f336w_vega_tot\'',
+                                          'doc_comment': 'Uncertainty of `F336W_VEGA\'',
                                           'tab_comment': None
                                           },
-            'PHANGS_F435W_VEGA_TOT': {'col_name': 'f435w_vega_tot',
+            'PHANGS_F435W_VEGA_TOT': {'col_name': 'PHANGS_F435W_VEGA',
+                                      # 'col_name': 'f435w_vega',
                                       'unit': u.mag,
                                       'unit_str': 'mag',
-                                      'doc_comment': 'Note that for Targets observed with the UVIS detector, '
-                                                     'the filter name of the B-band is f438w. '
-                                                     'WFC3 f435w (B-band) total vega magnitude, MW foreground '
-                                                     'reddening and aperture corrected. For more details on the '
-                                                     'aperture correction see '
+                                      'doc_comment': 'ACS WFC3 f435w (B-band) apparent vega magnitude, MW foreground '
+                                                     'reddening and aperture corrected. '
+                                                     'This column is only provided for targets observed with ACS WFC3 '
+                                                     'detector. '
+                                                     'For more details on the aperture correction see '
                                                      'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
                                                      'source is not covered by HST filter. See also the '
                                                      '`no_coverage_flag\' column.',
                                       'tab_comment': None
                                       },
-            'PHANGS_F435W_VEGA_TOT_ERR': {'col_name': 'f435w_vega_tot_err',
+            'PHANGS_F435W_VEGA_TOT_ERR': {'col_name': 'PHANGS_F435W_VEGA_ERR',
+                                          # 'col_name': 'f435w_vega_err',
                                           'unit': u.mag,
                                           'unit_str': 'mag',
-                                          'doc_comment': 'Uncertainty of `f435w_vega_tot\'',
+                                          'doc_comment': 'Uncertainty of `F435W_VEGA\'',
                                           'tab_comment': None
                                           },
-            'PHANGS_F438W_VEGA_TOT': {'col_name': 'f438w_vega_tot',
+            'PHANGS_F438W_VEGA_TOT': {'col_name': 'PHANGS_F438W_VEGA',
+                                      # 'col_name': 'f438w_vega',
                                       'unit': u.mag,
                                       'unit_str': 'mag',
-                                      'doc_comment': 'Note that for Targets observed with the WFC detector, '
-                                                     'the filter name of the B-band is f435w. '
-                                                     'WFC3 f438w (B-band) total vega magnitude, MW foreground '
-                                                     'reddening and aperture corrected. For more details on the '
+                                      'doc_comment': 'WFC3 f438w (B-band) apparent vega magnitude, MW foreground '
+                                                     'reddening and aperture corrected. '
+                                                     'This column is only provided for targets observed with UVIS WFC3 '
+                                                     'detector. '
+                                                     'For more details on the '
                                                      'aperture correction see '
                                                      'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
                                                      'source is not covered by HST filter. See also the '
                                                      '`no_coverage_flag\' column.',
                                       'tab_comment': None
                                       },
-            'PHANGS_F438W_VEGA_TOT_ERR': {'col_name': 'f438w_vega_tot_err',
+            'PHANGS_F438W_VEGA_TOT_ERR': {'col_name': 'PHANGS_F438W_VEGA_ERR',
+                                          # 'col_name': 'f438w_vega_err',
                                           'unit': u.mag,
                                           'unit_str': 'mag',
-                                          'doc_comment': 'Uncertainty of `f438w_vega_tot\'',
+                                          'doc_comment': 'Uncertainty of `F438W_VEGA\'',
                                           'tab_comment': None
                                           },
-            'PHANGS_F555W_VEGA_TOT': {'col_name': 'f555w_vega_tot',
+            'PHANGS_F555W_VEGA_TOT': {'col_name': 'PHANGS_F555W_VEGA',
+                                      # 'col_name': 'f555w_vega',
                                       'unit': u.mag,
                                       'unit_str': 'mag',
-                                      'doc_comment': 'WFC3 f555w (V-band) total vega magnitude, MW foreground '
+                                      'doc_comment': 'WFC3 f555w (V-band) apparent vega magnitude, MW foreground '
                                                      'reddening and aperture corrected. For more details on the '
                                                      'aperture correction see '
                                                      'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
@@ -217,16 +300,18 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                      '`no_coverage_flag\' column.',
                                       'tab_comment': None
                                       },
-            'PHANGS_F555W_VEGA_TOT_ERR': {'col_name': 'f555w_vega_tot_err',
+            'PHANGS_F555W_VEGA_TOT_ERR': {'col_name': 'PHANGS_F555W_VEGA_ERR',
+                                          # 'col_name': 'f555w_vega_err',
                                           'unit': u.mag,
                                           'unit_str': 'mag',
-                                          'doc_comment': 'Uncertainty of `f555w_vega_tot\'',
+                                          'doc_comment': 'Uncertainty of `F555W_VEGA\'',
                                           'tab_comment': None
                                           },
-            'PHANGS_F814W_VEGA_TOT': {'col_name': 'f814w_vega_tot',
+            'PHANGS_F814W_VEGA_TOT': {'col_name': 'PHANGS_F814W_VEGA',
+                                      # 'col_name': 'f814w_vega',
                                       'unit': u.mag,
                                       'unit_str': 'mag',
-                                      'doc_comment': 'WFC3 f814w (I-band) total vega magnitude, MW foreground '
+                                      'doc_comment': 'WFC3 f814w (I-band) apparent vega magnitude, MW foreground '
                                                      'reddening and aperture corrected. For more details on the '
                                                      'aperture correction see '
                                                      'Deger et al. (2022) (2022MNRAS.510...32D). Set to -9999 if '
@@ -234,117 +319,131 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                      '`no_coverage_flag\' column.',
                                       'tab_comment': None
                                       },
-            'PHANGS_F814W_VEGA_TOT_ERR': {'col_name': 'f814w_vega_tot_err',
+            'PHANGS_F814W_VEGA_TOT_ERR': {'col_name': 'PHANGS_F814W_VEGA_ERR',
+                                          # 'col_name': 'f814w_vega_err',
                                           'unit': u.mag,
                                           'unit_str': 'mag',
-                                          'doc_comment': 'Uncertainty of `f814w_vega_tot\'',
+                                          'doc_comment': 'Uncertainty of `F814W_VEGA\'',
                                           'tab_comment': None
                                           },
             # flux in mJy
-            'PHANGS_F275W_mJy_TOT': {'col_name': 'f275w_mJy_tot',
+            'PHANGS_F275W_mJy_TOT': {'col_name': 'PHANGS_F275W_mJy',
+                                     # 'col_name': 'f275w_mJy',
                                      'unit': u.mJy,
                                      'unit_str': 'mJy',
-                                     'doc_comment': 'WFC3 f275w (NUV-band) total flux in mJy, MW foreground reddening '
+                                     'doc_comment': 'WFC3 f275w (NUV-band) flux in mJy, MW foreground reddening '
                                                     'and aperture corrected. For more details on the aperture '
                                                     'correction see Deger et al. (2022) (2022MNRAS.510...32D). '
                                                     'Set to -9999 if source is not covered by HST filter. See also the '
                                                     '`no_coverage_flag\' column.',
-                                     'tab_comment': 'WFC3 f275w (NUV-band) total flux in mJy, MW foreground '
+                                     'tab_comment': 'WFC3 f275w (NUV-band) flux in mJy, MW foreground '
                                                     'reddening and aperture corrected. Set to -9999 if source is not '
                                                     'covered by HST filter.'
                                      },
-            'PHANGS_F275W_mJy_TOT_ERR': {'col_name': 'f275w_mJy_tot_err',
+            'PHANGS_F275W_mJy_TOT_ERR': {'col_name': 'PHANGS_F275W_mJy_ERR',
+                                         # 'col_name': 'f275w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
-                                         'doc_comment': 'Uncertainty of `f275w_mJy_tot\'',
-                                         'tab_comment': 'Uncertainty of `f275w_mJy_tot\''
+                                         'doc_comment': 'Uncertainty of `F275W_mJy\'',
+                                         'tab_comment': 'Uncertainty of `F275W_mJy\''
                                          },
-            'PHANGS_F336W_mJy_TOT': {'col_name': 'f336w_mJy_tot',
+            'PHANGS_F336W_mJy_TOT': {'col_name': 'PHANGS_F336W_mJy',
+                                     # 'col_name': 'f336w_mJy',
                                      'unit': u.mJy,
                                      'unit_str': 'mJy',
-                                     'doc_comment': 'WFC3 f336w (U-band) total flux in mJy, MW foreground reddening '
+                                     'doc_comment': 'WFC3 f336w (U-band) flux in mJy, MW foreground reddening '
                                                     'and aperture corrected. For more details on the aperture '
                                                     'correction see Deger et al. (2022) (2022MNRAS.510...32D). '
                                                     'Set to -9999 if source is not covered by HST filter. See also the '
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F336W_mJy_TOT_ERR': {'col_name': 'f336w_mJy_tot_err',
+            'PHANGS_F336W_mJy_TOT_ERR': {'col_name': 'PHANGS_F336W_mJy_ERR',
+                                         # 'col_name': 'f336w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
-                                         'doc_comment': 'Uncertainty of `f336w_mJy_tot\'',
+                                         'doc_comment': 'Uncertainty of `F336W_mJy\'',
                                          'tab_comment': None
                                          },
-            'PHANGS_F435W_mJy_TOT': {'col_name': 'f435w_mJy_tot',
+            'PHANGS_F435W_mJy_TOT': {'col_name': 'PHANGS_F435W_mJy',
+                                     # 'col_name': 'f435w_mJy',
                                      'unit': u.mJy,
                                      'unit_str': 'mJy',
                                      'doc_comment': 'Note that for Targets observed with the UVIS detector, '
                                                     'the filter name of the B-band is f438w. '
-                                                    'WFC3 f435w (B-band) total flux in mJy, MW foreground reddening '
+                                                    'WFC3 f435w (B-band) flux in mJy, MW foreground reddening '
                                                     'and aperture corrected. For more details on the aperture '
                                                     'correction see Deger et al. (2022) (2022MNRAS.510...32D). '
                                                     'Set to -9999 if source is not covered by HST filter. See also the '
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F435W_mJy_TOT_ERR': {'col_name': 'f435w_mJy_tot_err',
+            'PHANGS_F435W_mJy_TOT_ERR': {'col_name': 'PHANGS_F435W_mJy_ERR',
+                                         # 'col_name': 'f435w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
-                                         'doc_comment': 'Uncertainty of `f435w_mJy_tot\'',
+                                         'doc_comment': 'Uncertainty of `F435W_mJy\'',
                                          'tab_comment': None
                                          },
-            'PHANGS_F438W_mJy_TOT': {'col_name': 'f438w_mJy_tot',
+            'PHANGS_F438W_mJy_TOT': {'col_name': 'PHANGS_F438W_mJy',
+                                     # 'col_name': 'f438w_mJy',
                                      'unit': u.mJy,
                                      'unit_str': 'mJy',
                                      'doc_comment': 'Note that for Targets observed with the WFC detector, '
                                                     'the filter name of the B-band is f435w. '
-                                                    'WFC3 f438w (B-band) total flux in mJy, MW foreground reddening '
+                                                    'WFC3 f438w (B-band) flux in mJy, MW foreground reddening '
                                                     'and aperture corrected. For more details on the aperture '
                                                     'correction see Deger et al. (2022) (2022MNRAS.510...32D). '
                                                     'Set to -9999 if source is not covered by HST filter. See also the '
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F438W_mJy_TOT_ERR': {'col_name': 'f438w_mJy_tot_err',
+            'PHANGS_F438W_mJy_TOT_ERR': {'col_name': 'PHANGS_F438W_mJy_ERR',
+                                         # 'col_name': 'f438w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
-                                         'doc_comment': 'Uncertainty of `f438w_mJy_tot\'',
+                                         'doc_comment': 'Uncertainty of `F438W_mJy\'',
                                          'tab_comment': None
                                          },
-            'PHANGS_F555W_mJy_TOT': {'col_name': 'f555w_mJy_tot',
+            'PHANGS_F555W_mJy_TOT': {'col_name': 'PHANGS_F555W_mJy',
+                                     # 'col_name': 'f555w_mJy',
                                      'unit': u.mJy,
                                      'unit_str': 'mJy',
-                                     'doc_comment': 'WFC3 f555w (V-band) total flux in mJy, MW foreground reddening '
+                                     'doc_comment': 'WFC3 f555w (V-band) flux in mJy, MW foreground reddening '
                                                     'and aperture corrected. For more details on the aperture '
                                                     'correction see Deger et al. (2022) (2022MNRAS.510...32D). '
                                                     'Set to -9999 if source is not covered by HST filter. See also the '
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F555W_mJy_TOT_ERR': {'col_name': 'f555w_mJy_tot_err',
+            'PHANGS_F555W_mJy_TOT_ERR': {'col_name': 'PHANGS_F555W_mJy_TOT_ERR',
+                                         # 'col_name': 'f555w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
-                                         'doc_comment': 'Uncertainty of `f555w_mJy_tot\'',
+                                         'doc_comment': 'Uncertainty of `F555W_mJy\'',
                                          'tab_comment': None
                                          },
-            'PHANGS_F814W_mJy_TOT': {'col_name': 'f814w_mJy_tot',
+            'PHANGS_F814W_mJy_TOT': {'col_name': 'PHANGS_F814W_mJy',
+                                     # 'col_name': 'f814w_mJy',
                                      'unit': u.mJy,
                                      'unit_str': 'mJy',
-                                     'doc_comment': 'WFC3 f814w (I-band) total flux in mJy, MW foreground reddening '
+                                     'doc_comment': 'WFC3 f814w (I-band) flux in mJy, MW foreground reddening '
                                                     'and aperture corrected. For more details on the aperture '
                                                     'correction see Deger et al. (2022) (2022MNRAS.510...32D). '
                                                     'Set to -9999 if source is not covered by HST filter. See also the '
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F814W_mJy_TOT_ERR': {'col_name': 'f814w_mJy_tot_err',
+            'PHANGS_F814W_mJy_TOT_ERR': {'col_name': 'PHANGS_F814W_mJy_TOT_ERR',
+                                         # 'col_name': 'f814w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
-                                         'doc_comment': 'Uncertainty of `f814w_mJy_tot\'',
+                                         'doc_comment': 'Uncertainty of `F814W_mJy\'',
                                          'tab_comment': None
                                          },
             # detection and coverage flags
-            'PHANGS_NON_DETECTION_FLAG': {'col_name': 'non_detection_flag',
+            'PHANGS_NON_DETECTION_FLAG': {'col_name': 'PHANGS_NON_DETECTION_FLAG',
+                                          # 'col_name': 'non_detection_flag',
                                           'unit': None,
                                           'unit_str': 'int',
                                           'doc_comment': 'An integer denoting the number of bands in which the '
@@ -363,7 +462,8 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                          'detected in four and three bands, resectively. By design, '
                                                          'this flag cannot be higher than 2.'
                                           },
-            'PHANGS_NO_COVERAGE_FLAG': {'col_name': 'no_coverage_flag',
+            'PHANGS_NO_COVERAGE_FLAG': {'col_name': 'PHANGS_NO_COVERAGE_FLAG',
+                                        # 'col_name': 'no_coverage_flag',
                                         'unit': None,
                                         'unit_str': 'int',
                                         'doc_comment': 'An integer denoting the number of bands for which the object '
@@ -375,7 +475,8 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                        'columns are set to -9999.'
                                         },
             # Concentration index
-            'PHANGS_CI': {'col_name': 'ci',
+            'PHANGS_CI': {'col_name': 'PHANGS_CI',
+                          # 'col_name': 'ci',
                           'unit': None,
                           'unit_str': 'float',
                           'doc_comment': 'Concentration index: difference in magnitudes measured in 1 pix and 3 pix '
@@ -383,86 +484,587 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                           'tab_comment': 'Concentration index: difference in magnitudes measured in 1 pix and 3 pix '
                                          'radii apertures.',
                           },
+            # Concentration index
+            'cc_class': {'col_name': 'CC_CLASS',
+                          'unit': None,
+                          'unit_str': 'str',
+                          'doc_comment': 'Flag to identify in which region on the color-color diagram the object was '
+                                         'associated with. Values are \"ycl\" (young cluster locus), \"map\" '
+                                         '(middle aged plume) \"ogcc\" (old globular cluster clump) or \"outside\" '
+                                         '(outside the main regions and therefore not classified). '
+                                         'A detailed description is found in Section 4.4 of Maschmann et al. (in prep)',
+                          'tab_comment': 'Flag to identify in which region on the color-color diagram the object was '
+                                         'associated with. Values are `ycl\' (young cluster locus), `map\' '
+                                         '(middle aged plume) `ogcc\' (old globular cluster clump) or `outside\' '
+                                         '(outside the main regions and therefore not classified). '
+                                         'A detailed description is found in Section\\,\\ref{ssect:cc_regions}.',
+                          },
 
             # Fit results
-            'PHANGS_AGE_MINCHISQ': {'col_name': 'age',
+            'PHANGS_AGE_MINCHISQ': {'col_name': 'PHANGS_AGE_MINCHISQ',
+                                    # 'col_name': 'age',
                                     'unit': u.Myr,
                                     'unit_str': 'Myr',
                                     'doc_comment': 'Cluster age corresponding to SED fit with minimum reduced chisq',
                                     'tab_comment': 'Cluster age corresponding to SED fit with minimum reduced chisq',
                                     },
-            'PHANGS_AGE_MINCHISQ_ERR': {'col_name': 'age_err',
+            'PHANGS_AGE_MINCHISQ_ERR': {'col_name': 'PHANGS_AGE_MINCHISQ_ERR',
+                                        # 'col_name': 'age_err',
                                         'unit': u.Myr,
                                         'unit_str': 'Myr',
                                         'doc_comment': 'Uncertainty of `age\'',
                                         'tab_comment': 'Uncertainty of `age\'',
                                         },
-            'PHANGS_MASS_MINCHISQ': {'col_name': 'mass',
-                                     'unit': u.Myr,
-                                     'unit_str': 'Myr',
+            'PHANGS_MASS_MINCHISQ': {'col_name': 'PHANGS_MASS_MINCHISQ',
+                                     # 'col_name': 'mass',
+                                     'unit': u.M_sun,
+                                     'unit_str': 'M_sun',
                                      'doc_comment': 'Cluster mass corresponding to SED fit with minimum reduced chisq',
                                      'tab_comment': 'Cluster mass corresponding to SED fit with minimum reduced chisq',
                                      },
-            'PHANGS_MASS_MINCHISQ_ERR': {'col_name': 'mass_err',
-                                         'unit': u.Myr,
-                                         'unit_str': 'Myr',
+            'PHANGS_MASS_MINCHISQ_ERR': {'col_name': 'PHANGS_MASS_MINCHISQ_ERR',
+                                         # 'col_name': 'mass_err',
+                                         'unit': u.M_sun,
+                                         'unit_str': 'M_sun',
                                          'doc_comment': 'Uncertainty of `mass\'',
                                          'tab_comment': 'Uncertainty of `mass\'',
                                          },
-            'PHANGS_EBV_MINCHISQ': {'col_name': 'ebv',
-                                    'unit': u.M_sun,
-                                    'unit_str': r'M$_{\odot}$',
+            'PHANGS_EBV_MINCHISQ': {'col_name': 'PHANGS_EBV_MINCHISQ',
+                                    # 'col_name': 'ebv',
+                                    'unit': u.mag,
+                                    'unit_str': r'mag',
                                     'doc_comment': 'Cluster reddening E(B-V) corresponding to SED fit with minimum '
                                                    'reduced chisq',
                                     'tab_comment': 'Cluster reddening E(B-V) corresponding to SED fit with minimum '
                                                    'reduced chisq',
                                     },
-            'PHANGS_EBV_MINCHISQ_ERR': {'col_name': 'ebv_err',
+            'PHANGS_EBV_MINCHISQ_ERR': {'col_name': 'PHANGS_EBV_MINCHISQ_ERR',
+                                        # 'col_name': 'ebv_err',
                                         'unit': u.mag,
                                         'unit_str': 'mag',
                                         'doc_comment': 'Uncertainty of `ebv\'',
                                         'tab_comment': 'Uncertainty of `ebv\'',
                                         },
-            'PHANGS_REDUCED_MINCHISQ': {'col_name': 'chisq',
+            'PHANGS_REDUCED_MINCHISQ': {'col_name': 'PHANGS_REDUCEDCHISQ_MINCHISQ',
+                                        # 'col_name': 'chisq',
                                         'unit': None,
                                         'unit_str': 'float',
                                         'doc_comment': 'The reduced chisq value from the SED fit that computed the '
                                                        'age, mass, and reddening of the cluster',
                                         'tab_comment': 'The reduced chisq value from the SED fit',
                                         },
-            'PHANGS_SEDFIX_CATEGORY_DR4': {'col_name': 'sed_fix_category',
-                                           'unit': None,
-                                           'unit_str': 'str',
-                                           'doc_comment': 'Category used to assign parameter grid for SED fit based on '
-                                                          'color-color topology and H-alpha surface brightness. '
-                                                          'Possible values can be `YRO\', `UNCHANGED\', or `OGC\'',
-                                           'tab_comment': 'Category used to assign parameter grid for SED fit. '
-                                                          'Possible values can be `YRO\', `UNCHANGED\', or `OGC\''
-                                           },
 
+
+            'NBHa_intensity': {'col_name': 'NBHa_intensity', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_intensity_medsub': {'col_name': 'NBHa_intensity_medsub', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_mask_medsub_lev1': {'col_name': 'NBHa_mask_medsub_lev1', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_mask_medsub_lev2': {'col_name': 'NBHa_mask_medsub_lev2', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_mask_medsub_lev3': {'col_name': 'NBHa_mask_medsub_lev3', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_mask_medsub_lev5': {'col_name': 'NBHa_mask_medsub_lev5', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_mask_medsub_lev10': {'col_name': 'NBHa_mask_medsub_lev10', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_intensity_medsub_inseg': {'col_name': 'NBHa_intensity_medsub_inseg', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NBHa_HIIreg': {'col_name': 'NBHa_HIIreg', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCpoly_UBVI': {'col_name': 'OGCpoly_UBVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'FlagOGC_UBVI': {'col_name': 'FlagOGC_UBVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGC_Cull1': {'col_name': 'OGC_Cull1', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCpoly_BVI': {'col_name': 'OGCpoly_BVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'FlagOGC_BVI': {'col_name': 'FlagOGC_BVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGC_Cull2': {'col_name': 'OGC_Cull2', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCrpoly_UBVI': {'col_name': 'OGCrpoly_UBVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'FlagOGCr_UBVI': {'col_name': 'FlagOGCr_UBVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCr_Cull1': {'col_name': 'OGCr_Cull1', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCrpoly_BVI': {'col_name': 'OGCrpoly_BVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'FlagOGCr_BVI': {'col_name': 'FlagOGCr_BVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCr_Cull2': {'col_name': 'OGCr_Cull2', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YROpoly_UBVI': {'col_name': 'YROpoly_UBVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'FlagYRO_UBVI': {'col_name': 'FlagYRO_UBVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YRO_Cull1': {'col_name': 'YRO_Cull1', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YROpoly_BVI': {'col_name': 'YROpoly_BVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'FlagYRO_BVI': {'col_name': 'FlagYRO_BVI', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YRO_Cull2': {'col_name': 'YRO_Cull2', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_age': {'col_name': 'mm_Zyoung_youngestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_ebv': {'col_name': 'mm_Zyoung_youngestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_mass': {'col_name': 'mm_Zyoung_youngestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_likelihood': {'col_name': 'mm_Zyoung_youngestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_age': {'col_name': 'mm_Zyoung_bestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_ebv': {'col_name': 'mm_Zyoung_bestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_mass': {'col_name': 'mm_Zyoung_bestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_likelihood': {'col_name': 'mm_Zyoung_bestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_age_limlo': {'col_name': 'mm_Zyoung_youngestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_ebv_limlo': {'col_name': 'mm_Zyoung_youngestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_mass_limlo': {'col_name': 'mm_Zyoung_youngestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_age_limlo': {'col_name': 'mm_Zyoung_bestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_ebv_limlo': {'col_name': 'mm_Zyoung_bestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_mass_limlo': {'col_name': 'mm_Zyoung_bestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_age_limhi': {'col_name': 'mm_Zyoung_youngestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_ebv_limhi': {'col_name': 'mm_Zyoung_youngestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_youngestmode_mass_limhi': {'col_name': 'mm_Zyoung_youngestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_age_limhi': {'col_name': 'mm_Zyoung_bestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_ebv_limhi': {'col_name': 'mm_Zyoung_bestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Zyoung_bestmode_mass_limhi': {'col_name': 'mm_Zyoung_bestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_age': {'col_name': 'mm_Z_youngestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_ebv': {'col_name': 'mm_Z_youngestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_mass': {'col_name': 'mm_Z_youngestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_likelihood': {'col_name': 'mm_Z_youngestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_age': {'col_name': 'mm_Z_bestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_ebv': {'col_name': 'mm_Z_bestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_mass': {'col_name': 'mm_Z_bestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_likelihood': {'col_name': 'mm_Z_bestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_age_limlo': {'col_name': 'mm_Z_youngestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_ebv_limlo': {'col_name': 'mm_Z_youngestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_mass_limlo': {'col_name': 'mm_Z_youngestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_age_limlo': {'col_name': 'mm_Z_bestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_ebv_limlo': {'col_name': 'mm_Z_bestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_mass_limlo': {'col_name': 'mm_Z_bestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_age_limhi': {'col_name': 'mm_Z_youngestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_ebv_limhi': {'col_name': 'mm_Z_youngestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_youngestmode_mass_limhi': {'col_name': 'mm_Z_youngestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_age_limhi': {'col_name': 'mm_Z_bestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_ebv_limhi': {'col_name': 'mm_Z_bestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_Z_bestmode_mass_limhi': {'col_name': 'mm_Z_bestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_age': {'col_name': 'mm_lowZ_oldestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_ebv': {'col_name': 'mm_lowZ_oldestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_mass': {'col_name': 'mm_lowZ_oldestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_likelihood': {'col_name': 'mm_lowZ_oldestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_age': {'col_name': 'mm_lowZ_bestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_ebv': {'col_name': 'mm_lowZ_bestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_mass': {'col_name': 'mm_lowZ_bestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_likelihood': {'col_name': 'mm_lowZ_bestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_age_limlo': {'col_name': 'mm_lowZ_oldestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_ebv_limlo': {'col_name': 'mm_lowZ_oldestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_mass_limlo': {'col_name': 'mm_lowZ_oldestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_age_limlo': {'col_name': 'mm_lowZ_bestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_ebv_limlo': {'col_name': 'mm_lowZ_bestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_mass_limlo': {'col_name': 'mm_lowZ_bestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_age_limhi': {'col_name': 'mm_lowZ_oldestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_ebv_limhi': {'col_name': 'mm_lowZ_oldestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_oldestmode_mass_limhi': {'col_name': 'mm_lowZ_oldestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_age_limhi': {'col_name': 'mm_lowZ_bestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_ebv_limhi': {'col_name': 'mm_lowZ_bestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_lowZ_bestmode_mass_limhi': {'col_name': 'mm_lowZ_bestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_age': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_ebv': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_mass': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_likelihood': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_age': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_ebv': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_mass': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_likelihood': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_likelihood', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_age_limlo': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_ebv_limlo': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_mass_limlo': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_age_limlo': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_ebv_limlo': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_mass_limlo': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_age_limhi': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_ebv_limhi': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_youngestmode_mass_limhi': {'col_name': 'mm_ZyoungallowhighEBV_youngestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_age_limhi': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_ebv_limhi': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'mm_ZyoungallowhighEBV_bestmode_mass_limhi': {'col_name': 'mm_ZyoungallowhighEBV_bestmode_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGC_fix': {'col_name': 'OGC_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGC_spiraldigit': {'col_name': 'OGC_spiraldigit', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCclass_okay': {'col_name': 'OGCclass_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGCcc_okay': {'col_name': 'OGCcc_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'envmask': {'col_name': 'envmask', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YRO_fix': {'col_name': 'YRO_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YROclass_okay': {'col_name': 'YROclass_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YROcc_okay': {'col_name': 'YROcc_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'highEBV_fix': {'col_name': 'highEBV_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'highEBVclass_okay': {'col_name': 'highEBVclass_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'highEBVcc_okay': {'col_name': 'highEBVcc_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_age': {'col_name': 'SEDfix_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_ebv': {'col_name': 'SEDfix_ebv', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_mass': {'col_name': 'SEDfix_mass', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_age_limlo': {'col_name': 'SEDfix_age_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_ebv_limlo': {'col_name': 'SEDfix_ebv_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_mass_limlo': {'col_name': 'SEDfix_mass_limlo', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_age_limhi': {'col_name': 'SEDfix_age_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_ebv_limhi': {'col_name': 'SEDfix_ebv_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_mass_limhi': {'col_name': 'SEDfix_mass_limhi', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'SEDfix_likelihood_norm': {'col_name': 'SEDfix_likelihood_norm', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'PHANGS_DM': {'col_name': 'PHANGS_DM', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'PHANGS_DMPC': {'col_name': 'PHANGS_DMPC', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'PHANGS_DERR': {'col_name': 'PHANGS_DERR', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            
+            
+            #
+            #
+            # 'PHANGS_SEDFIX_CATEGORY_DR4': {# 'col_name': 'PHANGS_SEDFIX_CATEGORY_DR4',
+            #                    'col_name': 'PHANGS_SEDFIX_CATEGORY_DR4',
+            #                    'unit': None,
+            #                    'unit_str': 'str',
+            #                    'doc_comment': 'Category used to assign parameter grid for SED fit based on '
+            #                                   'color-color topology and H-alpha surface brightness. '
+            #                                   'Possible values can be `YRO\', `UNCHANGED\', or `OGC\'',
+            #                    'tab_comment': 'Category used to assign parameter grid for SED fit. '
+            #                                   'Possible values can be `YRO\', `UNCHANGED\', or `OGC\''
+            #                    },
+            #
+            #
+            #
+            # 'sed_fix_category': {
+            #                'col_name': 'sed_fix_category',
+            #                'unit': None,
+            #                'unit_str': 'str',
+            #     'doc_comment': 'Category used to assign parameter grid for SED fit. Possible values can be '
+            #                    '`YRO\', `UNCHANGED\', or `OGC\' ',
+            #     'tab_comment': 'Category used to assign parameter grid for SED fit. Possible values can be '
+            #                    '`YRO\', `UNCHANGED\', or `OGC\' ',
+            #                },
+            # 'SEDfix_age': {# 'col_name': 'SEDfix_age',
+            #                'col_name': 'sed_fix_age',
+            #                'unit': u.Myr,
+            #                'unit_str': 'Myr',
+            #     'doc_comment': 'age corresponding to fixed SED fit.',
+            #     'tab_comment': 'age corresponding to fixed SED fit.',
+            #                },
+            # 'SEDfix_age_err': {# 'col_name': 'SEDfix_age_err',
+            #                'col_name': 'sed_fix_age_err',
+            #                'unit': u.Myr,
+            #                'unit_str': 'Myr',
+            #     'doc_comment':  'Uncertainty of `sed_fix_age\'',
+            #     'tab_comment':  'Uncertainty of `sed_fix_age\'',
+            #                },
+            # 'SEDfix_ebv': {# 'col_name': 'SEDfix_ebv',
+            #                'col_name': 'sed_fix_ebv',
+            #                'unit': u.mag,
+            #                'unit_str': 'mag',
+            #     'doc_comment': 'Reddening E(B-V) corresponding to fixed SED fit.',
+            #     'tab_comment': 'Reddening E(B-V) corresponding to fixed SED fit.',
+            #                },
+            # 'SEDfix_ebv_err': {'col_name': 'sed_fix_ebv_err',
+            #                    'unit': u.mag,
+            #                'unit_str': 'mag',
+            #     'doc_comment':  'Uncertainty of `sed_fix_ebv\'',
+            #     'tab_comment':  'Uncertainty of `sed_fix_ebv\'',
+            #                },
+            # 'SEDfix_mass': {
+            #     'col_name': 'sed_fix_mass',
+            #     'unit': u.M_sun,
+            #     'unit_str': 'M_sun',
+            #     'doc_comment': 'Stellar mass corresponding to fixed SED fit.',
+            #     'tab_comment': 'Stellar mass corresponding to fixed SED fit.',
+            #                 },
+            # 'SEDfix_mass_err': {
+            #                'col_name': 'sed_fix_mass_err',
+            #                'unit': u.M_sun,
+            #                'unit_str': 'M_sun',
+            #     'doc_comment':  'Uncertainty of `sed_fix_mass\'',
+            #     'tab_comment':  'Uncertainty of `sed_fix_mass\'',
+            #                },
+            # 'PHANGS_GALAXY':{
+            #     'col_name': 'PHANGS_GALAXY',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'PHANGS_DMPC':{
+            #     'col_name': 'PHANGS_DMPC',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'PHANGS_DERR':{
+            #     'col_name': 'PHANGS_DERR',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            #
+            # 'mm_Z_youngestmode_age': {
+            #     'col_name': 'mm_Z_youngestmode_age',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_Z_youngestmode_ebv': {
+            #     'col_name': 'mm_Z_youngestmode_ebv',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_Z_youngestmode_mass': {
+            #     'col_name': 'mm_Z_youngestmode_mass',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_Z_bestmode_age': {
+            #     'col_name': 'mm_Z_bestmode_age',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_Z_bestmode_ebv': {
+            #     'col_name': 'mm_Z_bestmode_ebv',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_Z_bestmode_mass': {
+            #     'col_name': 'mm_Z_bestmode_mass',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_lowZ_oldestmode_age': {
+            #     'col_name': 'mm_lowZ_oldestmode_age',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_lowZ_oldestmode_ebv': {
+            #     'col_name': 'mm_lowZ_oldestmode_ebv',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_lowZ_oldestmode_mass': {
+            #     'col_name': 'mm_lowZ_oldestmode_mass',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_lowZ_bestmode_age': {
+            #     'col_name': 'mm_lowZ_bestmode_age',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_lowZ_bestmode_ebv': {
+            #     'col_name': 'mm_lowZ_bestmode_ebv',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_lowZ_bestmode_mass': {
+            #     'col_name': 'mm_lowZ_bestmode_mass',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_ZhighEBV_youngestmode_age': {
+            #     'col_name': 'mm_ZhighEBV_youngestmode_age',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_ZhighEBV_youngestmode_ebv': {
+            #     'col_name': 'mm_ZhighEBV_youngestmode_ebv',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_ZhighEBV_youngestmode_mass': {
+            #     'col_name': 'mm_ZhighEBV_youngestmode_mass',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_ZhighEBV_bestmode_age': {
+            #     'col_name': 'mm_ZhighEBV_bestmode_age',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_ZhighEBV_bestmode_ebv': {
+            #     'col_name': 'mm_ZhighEBV_bestmode_ebv',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # },
+            # 'mm_ZhighEBV_bestmode_mass': {
+            #     'col_name': 'mm_ZhighEBV_bestmode_mass',
+            #     'unit': None,
+            #     'unit_str': ' ',
+            #     'doc_comment': ' ',
+            #     'tab_comment': ' '
+            # }
         }
+
+        self.cand_identifier_columns = ['ID_PHANGS_CLUSTERS_v1p2',
+                                        'ID_PHANGS_ALLSOURCES_v1p2',
+                                        'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC']
 
         self.identifier_columns = ['INDEX', 'ID_PHANGS_CLUSTERS_v1p2',
                                    # 'ID_PHANGS_ALLSOURCES',
                                    'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC']
 
+        self.classification_columns_doc = ['PHANGS_CLUSTER_CLASS_HUMAN', 'PHANGS_CLUSTER_CLASS_ML_VGG',
+                                       'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL', 'class_ml_vgg_corr']
+
         self.classification_columns = ['PHANGS_CLUSTER_CLASS_HUMAN', 'PHANGS_CLUSTER_CLASS_ML_VGG',
                                        'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL']
 
-        self.example_photometry_columns = ['PHANGS_F275W_VEGA_TOT', 'PHANGS_F275W_VEGA_TOT_ERR',
-                                           'PHANGS_F275W_mJy_TOT', 'PHANGS_F275W_mJy_TOT_ERR']
+        self.example_photometry_columns = ['PHANGS_[BAND]_VEGA_TOT', 'PHANGS_[BAND]_VEGA_TOT_ERR',
+                                           'PHANGS_[BAND]_mJy_TOT', 'PHANGS_[BAND]_mJy_TOT_ERR']
 
         self.detect_shape_columns = ['PHANGS_NON_DETECTION_FLAG', 'PHANGS_NO_COVERAGE_FLAG', 'PHANGS_CI']
 
         # list of columns entering table 1 (Observational properties)
-        self.tab1_columns = (self.identifier_columns + self.classification_columns + self.example_photometry_columns +
-                             self.detect_shape_columns)
+        self.tab1_columns = (['INDEX', 'id_phangs_cluster', 'ID_PHANGS_CLUSTERS_v1p2', 'ID_PHANGS_ALLSOURCES_v1p2',
+                              'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC'] +
+                             self.classification_columns + self.example_photometry_columns +
+                             self.detect_shape_columns + ['cc_class'])
 
-        self.tab2_columns = ['INDEX', 'ID_PHANGS_CLUSTERS', 'ID_PHANGS_ALLSOURCES',
-                             'PHANGS_AGE_MINCHISQ', 'PHANGS_AGE_MINCHISQ_ERR',
-                             'PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR',
-                             'PHANGS_EBV_MINCHISQ', 'PHANGS_EBV_MINCHISQ_ERR',
-                             'PHANGS_REDUCED_MINCHISQ', 'PHANGS_SEDFIX_CATEGORY_DR4']
+        self.sed_columns_doc = ['PHANGS_AGE_MINCHISQ', 'PHANGS_AGE_MINCHISQ_ERR',
+                            'PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR',
+                            'PHANGS_EBV_MINCHISQ', 'PHANGS_EBV_MINCHISQ_ERR',
+                            'PHANGS_REDUCED_MINCHISQ',
+                            'NBHa_intensity', 'NBHa_intensity_medsub', 'NBHa_mask_medsub_lev1', 'NBHa_mask_medsub_lev2',
+                                'NBHa_mask_medsub_lev3', 'NBHa_mask_medsub_lev5', 'NBHa_mask_medsub_lev10',
+                                'NBHa_intensity_medsub_inseg', 'NBHa_HIIreg', 'OGCpoly_UBVI', 'FlagOGC_UBVI',
+                                'OGC_Cull1', 'OGCpoly_BVI', 'FlagOGC_BVI', 'OGC_Cull2', 'OGCrpoly_UBVI',
+                                'FlagOGCr_UBVI', 'OGCr_Cull1', 'OGCrpoly_BVI', 'FlagOGCr_BVI', 'OGCr_Cull2',
+                                'YROpoly_UBVI', 'FlagYRO_UBVI', 'YRO_Cull1', 'YROpoly_BVI', 'FlagYRO_BVI', 'YRO_Cull2',
+                                'mm_Zyoung_youngestmode_age', 'mm_Zyoung_youngestmode_ebv',
+                                'mm_Zyoung_youngestmode_mass', 'mm_Zyoung_youngestmode_likelihood',
+                                'mm_Zyoung_bestmode_age', 'mm_Zyoung_bestmode_ebv', 'mm_Zyoung_bestmode_mass',
+                                'mm_Zyoung_bestmode_likelihood', 'mm_Zyoung_youngestmode_age_limlo',
+                                'mm_Zyoung_youngestmode_ebv_limlo', 'mm_Zyoung_youngestmode_mass_limlo',
+                                'mm_Zyoung_bestmode_age_limlo', 'mm_Zyoung_bestmode_ebv_limlo',
+                                'mm_Zyoung_bestmode_mass_limlo', 'mm_Zyoung_youngestmode_age_limhi',
+                                'mm_Zyoung_youngestmode_ebv_limhi', 'mm_Zyoung_youngestmode_mass_limhi',
+                                'mm_Zyoung_bestmode_age_limhi', 'mm_Zyoung_bestmode_ebv_limhi',
+                                'mm_Zyoung_bestmode_mass_limhi', 'mm_Z_youngestmode_age', 'mm_Z_youngestmode_ebv',
+                                'mm_Z_youngestmode_mass', 'mm_Z_youngestmode_likelihood', 'mm_Z_bestmode_age',
+                                'mm_Z_bestmode_ebv', 'mm_Z_bestmode_mass', 'mm_Z_bestmode_likelihood',
+                                'mm_Z_youngestmode_age_limlo', 'mm_Z_youngestmode_ebv_limlo',
+                                'mm_Z_youngestmode_mass_limlo', 'mm_Z_bestmode_age_limlo', 'mm_Z_bestmode_ebv_limlo',
+                                'mm_Z_bestmode_mass_limlo', 'mm_Z_youngestmode_age_limhi',
+                                'mm_Z_youngestmode_ebv_limhi', 'mm_Z_youngestmode_mass_limhi',
+                                'mm_Z_bestmode_age_limhi', 'mm_Z_bestmode_ebv_limhi', 'mm_Z_bestmode_mass_limhi',
+                                'mm_lowZ_oldestmode_age', 'mm_lowZ_oldestmode_ebv', 'mm_lowZ_oldestmode_mass',
+                                'mm_lowZ_oldestmode_likelihood', 'mm_lowZ_bestmode_age', 'mm_lowZ_bestmode_ebv',
+                                'mm_lowZ_bestmode_mass', 'mm_lowZ_bestmode_likelihood', 'mm_lowZ_oldestmode_age_limlo',
+                                'mm_lowZ_oldestmode_ebv_limlo', 'mm_lowZ_oldestmode_mass_limlo',
+                                'mm_lowZ_bestmode_age_limlo', 'mm_lowZ_bestmode_ebv_limlo',
+                                'mm_lowZ_bestmode_mass_limlo', 'mm_lowZ_oldestmode_age_limhi',
+                                'mm_lowZ_oldestmode_ebv_limhi', 'mm_lowZ_oldestmode_mass_limhi',
+                                'mm_lowZ_bestmode_age_limhi', 'mm_lowZ_bestmode_ebv_limhi',
+                                'mm_lowZ_bestmode_mass_limhi', 'mm_ZyoungallowhighEBV_youngestmode_age',
+                                'mm_ZyoungallowhighEBV_youngestmode_ebv', 'mm_ZyoungallowhighEBV_youngestmode_mass',
+                                'mm_ZyoungallowhighEBV_youngestmode_likelihood', 'mm_ZyoungallowhighEBV_bestmode_age',
+                                'mm_ZyoungallowhighEBV_bestmode_ebv', 'mm_ZyoungallowhighEBV_bestmode_mass',
+                                'mm_ZyoungallowhighEBV_bestmode_likelihood',
+                                'mm_ZyoungallowhighEBV_youngestmode_age_limlo',
+                                'mm_ZyoungallowhighEBV_youngestmode_ebv_limlo',
+                                'mm_ZyoungallowhighEBV_youngestmode_mass_limlo',
+                                'mm_ZyoungallowhighEBV_bestmode_age_limlo',
+                                'mm_ZyoungallowhighEBV_bestmode_ebv_limlo',
+                                'mm_ZyoungallowhighEBV_bestmode_mass_limlo',
+                                'mm_ZyoungallowhighEBV_youngestmode_age_limhi',
+                                'mm_ZyoungallowhighEBV_youngestmode_ebv_limhi',
+                                'mm_ZyoungallowhighEBV_youngestmode_mass_limhi',
+                                'mm_ZyoungallowhighEBV_bestmode_age_limhi',
+                                'mm_ZyoungallowhighEBV_bestmode_ebv_limhi',
+                                'mm_ZyoungallowhighEBV_bestmode_mass_limhi', 'OGC_fix', 'OGC_spiraldigit',
+                                'OGCclass_okay', 'OGCcc_okay', 'envmask', 'YRO_fix', 'YROclass_okay', 'YROcc_okay',
+                                'highEBV_fix', 'highEBVclass_okay', 'highEBVcc_okay', 'SEDfix_age', 'SEDfix_ebv',
+                                'SEDfix_mass', 'SEDfix_age_limlo', 'SEDfix_ebv_limlo', 'SEDfix_mass_limlo',
+                                'SEDfix_age_limhi', 'SEDfix_ebv_limhi', 'SEDfix_mass_limhi', 'SEDfix_likelihood_norm',
+                                'PHANGS_DM', 'PHANGS_DMPC', 'PHANGS_DERR']
+
+        self.sed_columns = ['PHANGS_AGE_MINCHISQ', 'PHANGS_AGE_MINCHISQ_ERR',
+                            'PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR',
+                            'PHANGS_EBV_MINCHISQ', 'PHANGS_EBV_MINCHISQ_ERR',
+                            'PHANGS_REDUCED_MINCHISQ',
+                            'NBHa_intensity', 'NBHa_intensity_medsub', 'NBHa_mask_medsub_lev1', 'NBHa_mask_medsub_lev2',
+                                'NBHa_mask_medsub_lev3', 'NBHa_mask_medsub_lev5', 'NBHa_mask_medsub_lev10',
+                                'NBHa_intensity_medsub_inseg', 'NBHa_HIIreg', 'OGCpoly_UBVI', 'FlagOGC_UBVI',
+                                'OGC_Cull1', 'OGCpoly_BVI', 'FlagOGC_BVI', 'OGC_Cull2', 'OGCrpoly_UBVI',
+                                'FlagOGCr_UBVI', 'OGCr_Cull1', 'OGCrpoly_BVI', 'FlagOGCr_BVI', 'OGCr_Cull2',
+                                'YROpoly_UBVI', 'FlagYRO_UBVI', 'YRO_Cull1', 'YROpoly_BVI', 'FlagYRO_BVI', 'YRO_Cull2',
+                                'mm_Zyoung_youngestmode_age', 'mm_Zyoung_youngestmode_ebv',
+                                'mm_Zyoung_youngestmode_mass', 'mm_Zyoung_youngestmode_likelihood',
+                                'mm_Zyoung_bestmode_age', 'mm_Zyoung_bestmode_ebv', 'mm_Zyoung_bestmode_mass',
+                                'mm_Zyoung_bestmode_likelihood', 'mm_Zyoung_youngestmode_age_limlo',
+                                'mm_Zyoung_youngestmode_ebv_limlo', 'mm_Zyoung_youngestmode_mass_limlo',
+                                'mm_Zyoung_bestmode_age_limlo', 'mm_Zyoung_bestmode_ebv_limlo',
+                                'mm_Zyoung_bestmode_mass_limlo', 'mm_Zyoung_youngestmode_age_limhi',
+                                'mm_Zyoung_youngestmode_ebv_limhi', 'mm_Zyoung_youngestmode_mass_limhi',
+                                'mm_Zyoung_bestmode_age_limhi', 'mm_Zyoung_bestmode_ebv_limhi',
+                                'mm_Zyoung_bestmode_mass_limhi', 'mm_Z_youngestmode_age', 'mm_Z_youngestmode_ebv',
+                                'mm_Z_youngestmode_mass', 'mm_Z_youngestmode_likelihood', 'mm_Z_bestmode_age',
+                                'mm_Z_bestmode_ebv', 'mm_Z_bestmode_mass', 'mm_Z_bestmode_likelihood',
+                                'mm_Z_youngestmode_age_limlo', 'mm_Z_youngestmode_ebv_limlo',
+                                'mm_Z_youngestmode_mass_limlo', 'mm_Z_bestmode_age_limlo', 'mm_Z_bestmode_ebv_limlo',
+                                'mm_Z_bestmode_mass_limlo', 'mm_Z_youngestmode_age_limhi',
+                                'mm_Z_youngestmode_ebv_limhi', 'mm_Z_youngestmode_mass_limhi',
+                                'mm_Z_bestmode_age_limhi', 'mm_Z_bestmode_ebv_limhi', 'mm_Z_bestmode_mass_limhi',
+                                'mm_lowZ_oldestmode_age', 'mm_lowZ_oldestmode_ebv', 'mm_lowZ_oldestmode_mass',
+                                'mm_lowZ_oldestmode_likelihood', 'mm_lowZ_bestmode_age', 'mm_lowZ_bestmode_ebv',
+                                'mm_lowZ_bestmode_mass', 'mm_lowZ_bestmode_likelihood', 'mm_lowZ_oldestmode_age_limlo',
+                                'mm_lowZ_oldestmode_ebv_limlo', 'mm_lowZ_oldestmode_mass_limlo',
+                                'mm_lowZ_bestmode_age_limlo', 'mm_lowZ_bestmode_ebv_limlo',
+                                'mm_lowZ_bestmode_mass_limlo', 'mm_lowZ_oldestmode_age_limhi',
+                                'mm_lowZ_oldestmode_ebv_limhi', 'mm_lowZ_oldestmode_mass_limhi',
+                                'mm_lowZ_bestmode_age_limhi', 'mm_lowZ_bestmode_ebv_limhi',
+                                'mm_lowZ_bestmode_mass_limhi', 'mm_ZyoungallowhighEBV_youngestmode_age',
+                                'mm_ZyoungallowhighEBV_youngestmode_ebv', 'mm_ZyoungallowhighEBV_youngestmode_mass',
+                                'mm_ZyoungallowhighEBV_youngestmode_likelihood', 'mm_ZyoungallowhighEBV_bestmode_age',
+                                'mm_ZyoungallowhighEBV_bestmode_ebv', 'mm_ZyoungallowhighEBV_bestmode_mass',
+                                'mm_ZyoungallowhighEBV_bestmode_likelihood',
+                                'mm_ZyoungallowhighEBV_youngestmode_age_limlo',
+                                'mm_ZyoungallowhighEBV_youngestmode_ebv_limlo',
+                                'mm_ZyoungallowhighEBV_youngestmode_mass_limlo',
+                                'mm_ZyoungallowhighEBV_bestmode_age_limlo',
+                                'mm_ZyoungallowhighEBV_bestmode_ebv_limlo',
+                                'mm_ZyoungallowhighEBV_bestmode_mass_limlo',
+                                'mm_ZyoungallowhighEBV_youngestmode_age_limhi',
+                                'mm_ZyoungallowhighEBV_youngestmode_ebv_limhi',
+                                'mm_ZyoungallowhighEBV_youngestmode_mass_limhi',
+                                'mm_ZyoungallowhighEBV_bestmode_age_limhi',
+                                'mm_ZyoungallowhighEBV_bestmode_ebv_limhi',
+                                'mm_ZyoungallowhighEBV_bestmode_mass_limhi', 'OGC_fix', 'OGC_spiraldigit',
+                                'OGCclass_okay', 'OGCcc_okay', 'envmask', 'YRO_fix', 'YROclass_okay', 'YROcc_okay',
+                                'highEBV_fix', 'highEBVclass_okay', 'highEBVcc_okay', 'SEDfix_age', 'SEDfix_ebv',
+                                'SEDfix_mass', 'SEDfix_age_limlo', 'SEDfix_ebv_limlo', 'SEDfix_mass_limlo',
+                                'SEDfix_age_limhi', 'SEDfix_ebv_limhi', 'SEDfix_mass_limhi', 'SEDfix_likelihood_norm',
+                                'PHANGS_DM', 'PHANGS_DMPC', 'PHANGS_DERR']
+
+        self.tab2_columns = self.identifier_columns + self.sed_columns
+
+
+        # colnames_for documentation
+        self.doc_identifier_names = ['INDEX', 'id_phangs_cluster', 'ID_PHANGS_CLUSTERS_v1p2',
+                                     'ID_PHANGS_ALLSOURCES_v1p2']
+        self.doc_coord_names = ['PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC']
+
+        self.doc_photometry_columns = ['PHANGS_F275W_VEGA_TOT', 'PHANGS_F275W_VEGA_TOT_ERR',
+                                       'PHANGS_F336W_VEGA_TOT', 'PHANGS_F336W_VEGA_TOT_ERR',
+                                       'PHANGS_F435W_VEGA_TOT', 'PHANGS_F435W_VEGA_TOT_ERR',
+                                       'PHANGS_F438W_VEGA_TOT', 'PHANGS_F438W_VEGA_TOT_ERR',
+                                       'PHANGS_F555W_VEGA_TOT', 'PHANGS_F555W_VEGA_TOT_ERR',
+                                       'PHANGS_F814W_VEGA_TOT', 'PHANGS_F814W_VEGA_TOT_ERR',
+
+                                       'PHANGS_F275W_mJy_TOT', 'PHANGS_F275W_mJy_TOT_ERR',
+                                       'PHANGS_F336W_mJy_TOT', 'PHANGS_F336W_mJy_TOT_ERR',
+                                       'PHANGS_F435W_mJy_TOT', 'PHANGS_F435W_mJy_TOT_ERR',
+                                       'PHANGS_F438W_mJy_TOT', 'PHANGS_F438W_mJy_TOT_ERR',
+                                       'PHANGS_F555W_mJy_TOT', 'PHANGS_F555W_mJy_TOT_ERR',
+                                       'PHANGS_F814W_mJy_TOT', 'PHANGS_F814W_mJy_TOT_ERR']
 
     def get_obs_table_column_list(self, target):
         """
@@ -500,6 +1102,47 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
         columns_list += vega_column_names
         columns_list += mjy_column_names
         columns_list += self.detect_shape_columns
+        #columns_list += ['SEDfix_age', 'SEDfix_ebv', 'SEDfix_mass']
+
+        return columns_list
+
+    def get_cand_table_column_list(self, target):
+        """
+        returns list with all column names for the observational table
+
+        Parameters
+        ----------
+        target : str
+            Target name
+
+        Returns
+        -------
+        list : list
+        """
+
+        # get identifier and classification coulmns
+        columns_list = self.cand_identifier_columns + self.classification_columns
+
+        # to add the photometry bands we need to access the individual bands for each target and put them in order
+        band_list = []
+        for band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
+            if band in (self.phangs_hst_obs_band_dict[target]['acs_wfc1_observed_bands'] +
+                        self.phangs_hst_obs_band_dict[target]['wfc3_uvis_observed_bands']):
+                band_list.append(band)
+        band_list = self.sort_band_name_list(band_list=band_list)
+
+        # create the photometry coulmn names
+        vega_column_names = []
+        mjy_column_names = []
+        for band in band_list:
+            vega_column_names.append('PHANGS_%s_VEGA_TOT' % band)
+            vega_column_names.append('PHANGS_%s_VEGA_TOT_ERR' % band)
+            mjy_column_names.append('PHANGS_%s_mJy_TOT' % band)
+            mjy_column_names.append('PHANGS_%s_mJy_TOT_ERR' % band)
+        columns_list += vega_column_names
+        columns_list += mjy_column_names
+        columns_list += self.detect_shape_columns
+        columns_list += self.sed_columns
 
         return columns_list
 
@@ -583,7 +1226,7 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
         # for loop to go through all column names
         for key in table_keys:
             name_str = self.cat_info[key]['col_name'].replace('_', '\\_')
-            unit_str = self.cat_info[key]['unit_str']
+            unit_str = self.cat_info[key]['unit_str'].replace('_', '\\_')
             content_str = self.cat_info[key]['tab_comment'].replace('_', '\\_')
             # check if the description part is not too long
             if len(content_str) < max_length_description:

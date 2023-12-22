@@ -8,7 +8,8 @@ config_dict = {
     # specify the used Version. This is important since the naming of catalog files can change between IR versions.
     'hst_cc_ver': 'SEDfix_final_test_catalogs',
     # path to internal release
-    'path2ir': '/home/benutzer/data/PHANGS_products/HST_catalogs/SEDfix_final_test_catalogs',
+    # 'path2ir': '/home/benutzer/data/PHANGS_products/HST_catalogs/SEDfix_final_test_catalogs',
+    'path2ir': '/home/benutzer/data/PHANGS_products/HST_catalogs/SEDfix_Ha1_inclusiveGCcc_inclusiveGCclass',
 
     # Data output
     # data release
@@ -20,14 +21,27 @@ config_dict = {
 
     # Identified artifact in the internal release
     # path to tables/catalogs of artifacts
-    'path2artifact': '/home/benutzer/data/PHANGS_products/HST_catalogs/Artifact_Removal/AR0',
+    'path2artifact': '/home/benutzer/data/PHANGS_products/HST_catalogs/Artifact_Removal/AR1',
+    # a re-evaluation of questionable artefacts.
+    'path2questionable_artifacts': '/home/benutzer/data/PHANGS_products/HST_catalogs/Artifact_Removal/'
+                                   'Questionable Artifacts - questionable_artifacts.csv',
+    # masks for diffraction spikes
+    'path2diffraction_spike_masks': '/home/benutzer/data/PHANGS_products/HST_catalogs/Artifact_Removal/'
+                                    'diffraction_spikes/fits',
+    # limit for V-I color and concentration index
+    'v_i_color_lim': 2.0,
+    'ci_lim': 1.45,
+
     # flag if artifact removal step should be done
     'artifact_removal_flag': True,
     # flag to raise error if a file is not found. This can be handy for early stages in the development as not every
     # target has yet an artifact catalog. For the final version, however, this should be set to True
-    'artifact_rais_file_not_found_flag': False,
+    'artifact_rais_file_not_found_flag': True,
     # flag to plot the removed artefacts
-    'plot_removed_artifacts_flag': True,
+    'plot_removed_artifacts_flag': False,
+
+    # additional
+    'existing_artifact_removal_flag': True,
 
     # for artifact visualization
     'hst_data_path': '/media/benutzer/Sicherung/data/phangs_hst',
