@@ -210,7 +210,13 @@ class DataReleaseRoutines(CatalogInfo):
             index_last_classification = np.where(np.array(candidate_table.colnames) == 'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL')
             candidate_table.add_column(ml_class_corr_column, index=index_last_classification[0][0]+1)
 
-            # add column with
+            # set SED fits of not covered objects to -999
+            mask_bad_coverage_candidates = ((candidate_table['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                            (candidate_table['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+            list_names_sed_fixes = ['SEDfix_age', 'SEDfix_ebv', 'SEDfix_mass', 'SEDfix_age_limlo', 'SEDfix_ebv_limlo',
+                              'SEDfix_mass_limlo', 'SEDfix_age_limhi', 'SEDfix_ebv_limhi', 'SEDfix_mass_limhi']
+            for names_sed_fixes in list_names_sed_fixes:
+                candidate_table[names_sed_fixes][mask_bad_coverage_candidates] = -999
 
             # save table
             # check if folder already exists
@@ -406,7 +412,8 @@ class DataReleaseRoutines(CatalogInfo):
                     vi_color = table_ir['PHANGS_F555W_vega_tot'] - table_ir['PHANGS_F814W_vega_tot']
                     ci = table_ir['PHANGS_CI']
                     very_red_star_mask_table_ir = (vi_color > self.v_i_color_lim) & (ci < self.ci_lim)
-                    print('number of red stars ', sum(very_red_star_mask_table_ir))
+                    print('number of red stars (V-I > %.1f & CI < %.1f)' % (self.v_i_color_lim, self.ci_lim),
+                          sum(very_red_star_mask_table_ir))
 
                     print('total artefact removal: ', sum(artifact_mask_table_ir + existing_artifact_mask_table_ir +
                                                           artifact_in_diffraction_spike + very_red_star_mask_table_ir))
@@ -493,6 +500,21 @@ class DataReleaseRoutines(CatalogInfo):
                                                                             cl_class=cl_class, table_type='sed')
                         table_name_obs_2 = None
                         table_name_sed_2 = None
+
+                    # set SED fits of not covered objects to -999
+                    list_names_sed_fixes = ['SEDfix_age', 'SEDfix_ebv', 'SEDfix_mass', 'SEDfix_age_limlo',
+                                            'SEDfix_ebv_limlo', 'SEDfix_mass_limlo', 'SEDfix_age_limhi',
+                                            'SEDfix_ebv_limhi', 'SEDfix_mass_limhi']
+                    mask_bad_coverage_sed = ((obs_table_1['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                             (obs_table_1['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+                    for names_sed_fixes in list_names_sed_fixes:
+                        sed_table_1[names_sed_fixes][mask_bad_coverage_sed] = -999
+
+                    if sed_table_2 is not None:
+                        mask_bad_coverage_sed = ((obs_table_2['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                 (obs_table_2['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+                        for names_sed_fixes in list_names_sed_fixes:
+                            sed_table_2[names_sed_fixes][mask_bad_coverage_sed] = -999
 
                     # save table
                     # check if folder already exists
@@ -686,9 +708,9 @@ class DataReleaseRoutines(CatalogInfo):
 
         column_data_region = np.array(['outside'] * len(table['SEDfix_age']), dtype=str)
 
-        column_data_region[mask_ycl] = 'ycl'
-        column_data_region[mask_map] = 'map'
-        column_data_region[mask_ogcc] = 'ogcc'
+        column_data_region[mask_ycl] = 'YCL'
+        column_data_region[mask_map] = 'MAP'
+        column_data_region[mask_ogcc] = 'OGCC'
 
         region_column = Column(data=column_data_region,
                                name=self.cat_info['cc_class']['col_name'],

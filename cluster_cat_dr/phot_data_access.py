@@ -18,42 +18,95 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
     Access class to organize data structure of HST, NIRCAM and MIRI imaging data
     """
 
-    def __init__(self, target_name=None, hst_data_path=None, nircam_data_path=None, miri_data_path=None,
-                 hst_data_ver='v1.0', nircam_data_ver='v0p4p2', miri_data_ver='v0p5'):
+    def __init__(self, target_name=None,
+                 hst_target_name=None, hst_ha_target_name=None, nircam_target_name=None, miri_target_name=None,
+                 hst_data_path=None, hst_ha_data_path=None, nircam_data_path=None, miri_data_path=None,
+                 hst_data_ver='v1.0', hst_ha_data_ver='v1p0', nircam_data_ver='v0p4p2', miri_data_ver='v0p5'):
         """
+        In order to access photometry data one need to specify data path, versions and most important target names.
+        For example NGC 628 has in HST a specification "c" for center or "e" for east.
+        The HST broad band filter are also provided in mosaic versions however, this is not the case for H-alpha nor
+        for NIRCAM or MIRI
+
         Parameters
         ----------
         target_name : str
             Default None. Target name
+        hst_target_name : str
+            Default None. Target name for hst files
+        hst_ha_target_name : str
+            Default None. Target name for hst H-alpha files
+        nircam_target_name : str
+            Default None. Target name for NIRCAM files
+        miri_target_name : str
+            Default None. Target name for MIRI files
         hst_data_path : str
             Default None. Path to HST imaging data
+        hst_ha_data_path : str
+            Default None. Path to HST H-alpha imaging data
         nircam_data_path : str
             Default None. Path to NIRCAM imaging data
         miri_data_path : str
             Default None. Path to MIRI imaging data
         hst_data_ver : str
-            Default None. denotes the internal data release version of the HST imaging data.
+            Default v1.0 denotes the internal data release version of the HST imaging data.
+        hst_ha_data_ver : str
+            Default v1p0 denotes the internal data release version of the HST H-alpha imaging data.
         nircam_data_ver : str
-            Default None. denotes the internal data release version of the NIRCAM imaging data.
+            Default v0p4p2 denotes the internal data release version of the NIRCAM imaging data.
         miri_data_ver : str
-            Default None. denotes the internal data release version of the MIRI imaging data.
+            Default v0p5 denotes the internal data release version of the MIRI imaging data.
 
         """
         super().__init__()
 
-        self.target_name = target_name
-        if (((self.target_name not in self.phangs_galaxy_list) &
-            (self.target_name not in self.phangs_hst_obs_target_list) &
-            (self.target_name not in self.phangs_nircam_obs_target_list) &
-            (self.target_name not in self.phangs_miri_obs_target_list)) &
-                (self.target_name is not None)):
+        # get target specifications
+        # check if the target names are compatible
+        if (target_name not in self.phangs_galaxy_list) & (target_name is not None):
             raise AttributeError('The target %s is not in the PHANGS photometric sample or has not been added to '
-                                 'the current package version' % self.target_name)
+                                 'the current package version' % target_name)
+        if (hst_target_name not in self.phangs_hst_obs_target_list) & (hst_target_name is not None):
+            raise AttributeError('The target %s is not in the PHANGS-HST photometric sample or has not been added to '
+                                 'the current package version' % hst_target_name)
+        if (hst_ha_target_name not in self.phangs_hst_ha_obs_target_list) & (hst_ha_target_name is not None):
+            raise AttributeError('The target %s is not in the PHANGS-HST H-alpha photometric sample or has not been '
+                                 'added to the current package version' % hst_ha_target_name)
+        if (nircam_target_name not in self.phangs_nircam_obs_target_list) & (nircam_target_name is not None):
+            raise AttributeError('The target %s is not in the PHANGS-JWST / NIRCAM photometric sample or has not been '
+                                 'added to the current package version' % nircam_target_name)
+        if (miri_target_name not in self.phangs_miri_obs_target_list) & (miri_target_name is not None):
+            raise AttributeError('The target %s is not in the PHANGS-JWST / MIRI photometric sample or has not been '
+                                 'added to the current package version' % miri_target_name)
+        # get the target names as attributes
+        # in some cases it can be easy to just provide a target_name if all other target names are not specified with
+        # suffixes
+        self.target_name = target_name
+        if (hst_target_name is None) & (self.target_name in self.phangs_hst_obs_target_list):
+            self.hst_target_name = self.target_name
+        else:
+            self.hst_target_name = hst_target_name
+        if (hst_ha_target_name is None) & (self.target_name in self.phangs_hst_ha_obs_target_list):
+            self.hst_ha_target_name = self.target_name
+        else:
+            self.hst_ha_target_name = hst_ha_target_name
+        if (nircam_target_name is None) & (self.target_name in self.phangs_nircam_obs_target_list):
+            self.nircam_target_name = self.target_name
+        else:
+            self.nircam_target_name = hst_target_name
+        if (miri_target_name is None) & (self.target_name in self.phangs_miri_obs_target_list):
+            self.miri_target_name = self.target_name
+        else:
+            self.miri_target_name = miri_target_name
 
+        # specify the data paths
         if hst_data_path is None:
             self.hst_data_path = None
         else:
             self.hst_data_path = Path(hst_data_path)
+        if hst_ha_data_path is None:
+            self.hst_ha_data_path = None
+        else:
+            self.hst_ha_data_path = Path(hst_ha_data_path)
         if nircam_data_path is None:
             self.nircam_data_path = None
         else:
@@ -63,12 +116,15 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         else:
             self.miri_data_path = Path(miri_data_path)
 
+        # specify the data access version
         self.hst_data_ver = hst_data_ver
+        self.hst_ha_data_ver = hst_ha_data_ver
         self.nircam_data_ver = nircam_data_ver
         self.miri_data_ver = miri_data_ver
 
         # loaded data dictionaries
         self.hst_bands_data = {}
+        self.hst_ha_bands_data = {}
         self.nircam_bands_data = {}
         self.miri_bands_data = {}
 
@@ -168,6 +224,45 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                                                        str_in_file_name_1=ending_of_band_file)
         else:
             return Path(hst_data_folder) / Path(file_name)
+
+    def get_hst_ha_file_name(self, band, hst_ha_data_folder=None, file_name=None):
+        """
+
+        Parameters
+        ----------
+        band : str
+            the band can be either F657N, F658N, ha, ha_s, ha_si or ha_sic
+        hst_ha_data_folder : str
+        file_name : str
+
+        Returns
+        -------
+        data_file_path : Path
+        """
+        if band not in ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']:
+            raise AttributeError('The band <%s> is not in the list of possible HST H-alpha bands.' % band)
+
+        if hst_ha_data_folder is None:
+            hst_ha_data_folder = (self.hst_ha_data_path / self.hst_ha_ver_folder_names[self.hst_ha_data_ver])
+
+        # getting the band specification
+        if band in ['F657N', 'F658N']:
+            band_string = '_hst_%s_an.fits' % band.lower()
+        else:
+            band_string = '_hst_%s.fits' % band.lower()
+
+        if self.hst_ha_target_name[3] == '0':
+            target_str = self.hst_ha_target_name[:3] + self.hst_ha_target_name[4:]
+        else:
+            target_str = self.hst_ha_target_name
+
+        ending_of_band_file = target_str.lower() + band_string
+
+        if file_name is None:
+            return helper_func.identify_file_in_folder(folder_path=hst_ha_data_folder,
+                                                       str_in_file_name_1=ending_of_band_file)
+        else:
+            return Path(hst_ha_data_folder) / Path(file_name)
 
     def get_nircam_img_file_name(self, band, nircam_data_folder=None, file_name=None):
         """
@@ -314,6 +409,76 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                                         '%s_wcs_err' % band: err_wcs, '%s_unit_err' % band: flux_unit,
                                         '%s_pixel_area_size_sr_err' % band: pixel_area_size_sr})
 
+    def load_hst_ha_band(self, band, load_err=True, flux_unit='Jy', hst_ha_data_folder=None, img_file_name=None,
+                         err_file_name=None):
+        """
+
+        Parameters
+        ----------
+        band : str
+        load_err : bool
+        flux_unit : str
+        hst_ha_data_folder : str
+        img_file_name : str
+        err_file_name : str
+        """
+        # load the band observations
+        img_file_name = self.get_hst_ha_file_name(band=band, hst_ha_data_folder=hst_ha_data_folder,
+                                                  file_name=img_file_name)
+        img_data, img_header, img_wcs = helper_func.load_img(file_name=img_file_name)
+
+        # convert the flux unit
+        if 'PHOTFNU' in img_header:
+            conversion_factor = img_header['PHOTFNU']
+        elif 'PHOTFLAM' in img_header:
+            # wavelength in angstrom
+            pivot_wavelength = img_header['PHOTPLAM']
+            # inverse sensitivity, ergs/cm2/Ang/electron
+            sensitivity = img_header['PHOTFLAM']
+            # speed of light in Angstrom/s
+            c = speed_of_light * 1e10
+            # change the conversion facto to get erg s−1 cm−2 Hz−1
+            f_nu = sensitivity * pivot_wavelength ** 2 / c
+            # change to get Jy
+            conversion_factor = f_nu * 1e23
+        else:
+            raise KeyError('there is no PHOTFNU or PHOTFLAM in the header')
+
+        pixel_area_size_sr = img_wcs.proj_plane_pixel_area().value * self.sr_per_square_deg
+        # rescale data image
+        if flux_unit == 'Jy':
+            # rescale to Jy
+            conversion_factor = conversion_factor
+        elif flux_unit == 'mJy':
+            # rescale to Jy
+            conversion_factor *= 1e3
+        elif flux_unit == 'MJy/sr':
+            # get the size of one pixel in sr with the factor 1e6 for the conversion of Jy to MJy later
+            # change to MJy/sr
+            conversion_factor /= (pixel_area_size_sr * 1e6)
+        else:
+            raise KeyError('flux_unit ', flux_unit, ' not understand!')
+
+        img_data *= conversion_factor
+        self.hst_ha_bands_data.update({'%s_data_img' % band: img_data, '%s_header_img' % band: img_header,
+                                       '%s_wcs_img' % band: img_wcs, '%s_unit_img' % band: flux_unit,
+                                       '%s_pixel_area_size_sr_img' % band: pixel_area_size_sr})
+
+        """
+        To Do: Where are the uncertainty maps ??? 
+        """
+        # if load_err:
+        #     err_file_name = self.get_hst_err_file_name(band=band, hst_data_folder=hst_data_folder,
+        #                                                file_name=err_file_name)
+        #     err_data, err_header, err_wcs = helper_func.load_img(file_name=err_file_name)
+        #     err_data = 1 / np.sqrt(err_data)
+        #     err_data *= conversion_factor
+        #
+        #     self.hst_bands_data.update({'%s_data_err' % band: err_data, '%s_header_err' % band: err_header,
+        #                                 '%s_wcs_err' % band: err_wcs, '%s_unit_err' % band: flux_unit,
+        #                                 '%s_pixel_area_size_sr_err' % band: pixel_area_size_sr})
+        #
+
     def load_nircam_band(self, band, load_err=True, flux_unit='Jy', nircam_data_folder=None, img_file_name=None):
         """
 
@@ -355,8 +520,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                                            '%s_wcs_err' % band: img_wcs, '%s_unit_err' % band: flux_unit,
                                            '%s_pixel_area_size_sr_err' % band: pixel_area_size_sr})
 
-    def load_miri_band(self, band, load_err=True, flux_unit='Jy', miri_data_folder=None, img_file_name=None,
-                       err_file_name=None):
+    def load_miri_band(self, band, load_err=True, flux_unit='Jy', miri_data_folder=None, img_file_name=None):
         """
 
         Parameters
@@ -366,7 +530,6 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         flux_unit : str
         miri_data_folder : str
         img_file_name : str
-        err_file_name : str
         """
         # load the band observations
         file_name = self.get_miri_img_file_name(band=band, miri_data_folder=miri_data_folder, file_name=img_file_name)
@@ -408,10 +571,24 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         band_list : list
         """
         band_list = []
-        if self.target_name in self.phangs_hst_obs_target_list:
+        if self.hst_target_name in self.phangs_hst_obs_target_list:
             for band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
-                if band in (self.phangs_hst_obs_band_dict[self.target_name]['acs_wfc1_observed_bands'] +
-                            self.phangs_hst_obs_band_dict[self.target_name]['wfc3_uvis_observed_bands']):
+                if band in (self.phangs_hst_obs_band_dict[self.hst_target_name]['acs_wfc1_observed_bands'] +
+                            self.phangs_hst_obs_band_dict[self.hst_target_name]['wfc3_uvis_observed_bands']):
+                    band_list.append(band)
+        return self.sort_band_list(band_list=band_list)
+
+    def get_hst_ha_band_list(self):
+        """
+        gets list of bands of HST H-alpha filter
+        Returns
+        -------
+        band_list : list
+        """
+        band_list = []
+        if self.hst_ha_target_name in self.phangs_hst_ha_obs_target_list:
+            for band in ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']:
+                if band in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
                     band_list.append(band)
         return self.sort_band_list(band_list=band_list)
 
@@ -423,9 +600,9 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         band_list : list
         """
         band_list = []
-        if self.target_name in self.phangs_nircam_obs_target_list:
+        if self.nircam_target_name in self.phangs_nircam_obs_target_list:
             for band in self.nircam_bands:
-                if band in self.nircam_targets[self.target_name]['observed_bands']:
+                if band in self.nircam_targets[self.nircam_target_name]['observed_bands']:
                     band_list.append(band)
             band_list = self.sort_band_list(band_list=band_list)
         return band_list
@@ -438,29 +615,44 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         band_list : list
         """
         band_list = []
-        if self.target_name in self.phangs_miri_obs_target_list:
+        if self.nircam_target_name in self.phangs_miri_obs_target_list:
             for band in self.miri_bands:
-                if band in self.miri_targets[self.target_name]['observed_bands']:
+                if band in self.miri_targets[self.nircam_target_name]['observed_bands']:
                     band_list.append(band)
             band_list = self.sort_band_list(band_list=band_list)
         return band_list
 
-    def get_hst_nircam_miri_band_list(self):
+    def get_phangs_band_list(self, include_hst=True, include_hst_ha=True, include_nircam=True, include_miri=True):
         """
         wrapper to load all bands observed with HST, NIRCAM and MIRI for one target
+        Parameters
+        -------
+        include_hst : bool
+        include_hst_ha : bool
+        include_nircam : bool
+        include_miri : bool
+
         Returns
         -------
         band_list : list
         """
-        band_list = self.get_hst_band_list() + self.get_nircam_band_list() + self.get_miri_band_list()
+        band_list = []
+        if include_hst:
+            band_list += self.get_hst_band_list()
+        if include_hst_ha:
+            band_list += self.get_hst_ha_band_list()
+        if include_nircam:
+            band_list += self.get_nircam_band_list()
+        if include_miri:
+            band_list += self.get_miri_band_list()
 
         return self.sort_band_list(band_list=band_list)
 
-    def load_hst_nircam_miri_bands(self, band_list=None, flux_unit='Jy', folder_name_list=None,
-                                   img_file_name_list=None, err_file_name_list=None,
-                                   load_err=True):
+    def load_phangs_bands(self, band_list=None, flux_unit='Jy', folder_name_list=None, img_file_name_list=None,
+                          err_file_name_list=None, load_err=True):
         """
-        wrapper to load all available HST, NIRCAM and MIRI observations into the constructor
+        wrapper to load all available HST, HST-H-alpha, NIRCAM and MIRI observations into the constructor
+        This function checks if the band is already loaded and skips the loading if this is the case
 
         Parameters
         ----------
@@ -473,7 +665,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         """
         # geta list with all observed bands in order of wavelength
         if band_list is None:
-            band_list = self.get_hst_nircam_miri_band_list()
+            band_list = self.get_phangs_band_list()
         elif isinstance(band_list, str):
             band_list = [band_list]
 
@@ -493,20 +685,29 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         # load bands
         for band, folder_name, img_file_name, err_file_name in zip(band_list, folder_name_list, img_file_name_list,
                                                                    err_file_name_list):
-            if band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
+            # check if band is already loaded
+            if (('%s_data_img' % band in self.hst_bands_data) |
+                    ('%s_data_img' % band in self.hst_ha_bands_data) |
+                    ('%s_data_img' % band in self.nircam_bands_data) |
+                    ('%s_data_img' % band in self.miri_bands_data)):
+                continue
+
+            if band in ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']:
+                self.load_hst_ha_band(band=band, flux_unit=flux_unit, hst_ha_data_folder=folder_name,
+                                      img_file_name=img_file_name, err_file_name=err_file_name, load_err=load_err)
+            elif band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
                 self.load_hst_band(band=band, flux_unit=flux_unit, hst_data_folder=folder_name,
                                    img_file_name=img_file_name, err_file_name=err_file_name, load_err=load_err)
-
             elif band in self.nircam_bands:
                 self.load_nircam_band(band=band, flux_unit=flux_unit, nircam_data_folder=folder_name,
                                       img_file_name=img_file_name, load_err=load_err)
             elif band in self.miri_bands:
                 self.load_miri_band(band=band, flux_unit=flux_unit, miri_data_folder=folder_name,
-                                    img_file_name=img_file_name, err_file_name=err_file_name, load_err=load_err)
+                                    img_file_name=img_file_name, load_err=load_err)
             else:
                 raise KeyError('Band is not found in possible band lists')
 
-    def change_hst_nircam_miri_band_units(self, band_list=None, new_unit='MJy/sr'):
+    def change_phangs_band_units(self, band_list=None, new_unit='MJy/sr'):
         """
 
         Parameters
@@ -515,17 +716,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         new_unit : str
         """
         if band_list is None:
-            band_list = []
-            for band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
-                if band in (self.phangs_hst_obs_band_dict[self.target_name]['acs_wfc1_observed_bands'] +
-                            self.phangs_hst_obs_band_dict[self.target_name]['wfc3_uvis_observed_bands']):
-                    band_list.append(band)
-            for band in self.nircam_bands:
-                if band in self.nircam_targets[self.target_name]['observed_bands']:
-                    band_list.append(band)
-            for band in self.miri_bands:
-                if band in self.miri_targets[self.target_name]['observed_bands']:
-                    band_list.append(band)
+            band_list = self.get_phangs_band_list()
 
         for band in band_list:
             self.change_band_unit(band=band, new_unit=new_unit)
@@ -538,7 +729,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         band : str
         new_unit : str
         """
-        if band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
+        if band in self.get_hst_band_list():
 
             old_unit = self.hst_bands_data['%s_unit_img' % band]
             conversion_factor = 1
@@ -564,7 +755,33 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                 self.hst_bands_data['%s_data_err' % band] *= conversion_factor
                 self.hst_bands_data['%s_unit_err' % band] = new_unit
 
-        if band in self.nircam_bands:
+        if band in self.get_hst_ha_band_list():
+
+            old_unit = self.hst_ha_bands_data['%s_unit_img' % band]
+            conversion_factor = 1
+            # change to Jy
+            if 'm' in old_unit:
+                conversion_factor *= 1e-3
+            if 'M' in old_unit:
+                conversion_factor *= 1e6
+            if '/sr' in old_unit:
+                conversion_factor *= self.hst_ha_bands_data['%s_pixel_area_size_sr_img' % band]
+
+            # change to the new unit
+            if 'm' in new_unit:
+                conversion_factor *= 1e3
+            if 'M' in new_unit:
+                conversion_factor *= 1e-6
+            if '/sr' in new_unit:
+                conversion_factor /= self.hst_ha_bands_data['%s_pixel_area_size_sr_img' % band]
+
+            self.hst_ha_bands_data['%s_data_img' % band] *= conversion_factor
+            self.hst_ha_bands_data['%s_unit_img' % band] = new_unit
+            if '%s_data_err' % band in self.hst_ha_bands_data.keys():
+                self.hst_ha_bands_data['%s_data_err' % band] *= conversion_factor
+                self.hst_ha_bands_data['%s_unit_err' % band] = new_unit
+
+        if band in self.get_nircam_band_list():
             old_unit = self.nircam_bands_data['%s_unit_img' % band]
 
             conversion_factor = 1
@@ -636,7 +853,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         """
         # geta list with all observed bands in order of wavelength
         if band_list is None:
-            band_list = self.get_hst_nircam_miri_band_list()
+            band_list = self.get_phangs_band_list()
 
         if not isinstance(cutout_size, list):
             cutout_size = [cutout_size] * len(band_list)
@@ -646,7 +863,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         cutout_dict.update({'band_list': band_list})
 
         for band, band_index in zip(band_list, range(len(band_list))):
-            if band in list(set(self.hst_acs_wfc1_bands + self.hst_wfc3_uvis2_bands)):
+            if band in self.get_hst_band_list():
                 cutout_dict.update({
                     '%s_img_cutout' % band:
                         helper_func.get_img_cutout(img=self.hst_bands_data['%s_data_img' % band],
@@ -658,8 +875,20 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                             helper_func.get_img_cutout(img=self.hst_bands_data['%s_data_err' % band],
                                                        wcs=self.hst_bands_data['%s_wcs_err' % band],
                                                        coord=cutout_pos, cutout_size=cutout_size[band_index])})
+            if band in self.get_hst_ha_band_list():
+                cutout_dict.update({
+                    '%s_img_cutout' % band:
+                        helper_func.get_img_cutout(img=self.hst_ha_bands_data['%s_data_img' % band],
+                                                   wcs=self.hst_ha_bands_data['%s_wcs_img' % band],
+                                                   coord=cutout_pos, cutout_size=cutout_size[band_index])})
+                if include_err:
+                    cutout_dict.update({
+                        '%s_err_cutout' % band:
+                            helper_func.get_img_cutout(img=self.hst_ha_bands_data['%s_data_err' % band],
+                                                       wcs=self.hst_ha_bands_data['%s_wcs_err' % band],
+                                                       coord=cutout_pos, cutout_size=cutout_size[band_index])})
 
-            elif band in self.nircam_bands:
+            elif band in self.get_nircam_band_list():
                 cutout_dict.update({
                     '%s_img_cutout' % band:
                         helper_func.get_img_cutout(img=self.nircam_bands_data['%s_data_img' % band],
@@ -672,7 +901,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                                                        wcs=self.nircam_bands_data['%s_wcs_err' % band],
                                                        coord=cutout_pos, cutout_size=cutout_size[band_index])})
 
-            elif band in self.miri_bands:
+            elif band in self.get_miri_band_list():
                 cutout_dict.update({
                     '%s_img_cutout' % band:
                         helper_func.get_img_cutout(img=self.miri_bands_data['%s_data_img' % band],
@@ -699,13 +928,21 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         -------
         wavelength : float
         """
-        if band in self.phangs_hst_obs_band_dict[self.target_name]['acs_wfc1_observed_bands']:
+        if band in self.phangs_hst_obs_band_dict[self.hst_target_name]['acs_wfc1_observed_bands']:
             wave = self.hst_acs_wfc1_bands_mean_wave[band]
-        elif band in self.phangs_hst_obs_band_dict[self.target_name]['wfc3_uvis_observed_bands']:
+        elif band in self.phangs_hst_obs_band_dict[self.hst_target_name]['wfc3_uvis_observed_bands']:
             wave = self.hst_wfc3_uvis1_bands_mean_wave[band]
-        elif band in self.nircam_targets[self.target_name]['observed_bands']:
+        elif band in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
+            if 'F657N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
+                wave = self.hst_wfc3_uvis1_bands_mean_wave['F657N']
+            elif 'F658N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
+                wave = self.hst_wfc3_uvis1_bands_mean_wave['F658N']
+            else:
+                raise ValueError('The band <%s> is listed as an observed H-alpha filter but not F657N or F658N were '
+                                 'specified ' % band)
+        elif band in self.nircam_targets[self.nircam_target_name]['observed_bands']:
             wave = self.nircam_bands_mean_wave[band]
-        elif band in self.miri_targets[self.target_name]['observed_bands']:
+        elif band in self.miri_targets[self.miri_target_name]['observed_bands']:
             wave = self.miri_bands_mean_wave[band]
         else:
             raise KeyError(band, 'not understand')
@@ -739,8 +976,66 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         return list(np.array(band_list)[sort])
 
     def get_hst_median_exp_time(self, band):
+        """
+        Function to calculate the median exposure time of HST observations
+        Parameters
+        ----------
+        band : str
 
+        Returns
+        -------
+        median_exp_time : float
+        """
         exp_file_name = self.get_hst_exp_time_file_name(band=band)
-        # print(exp_file_name)
         data, header, wcs = helper_func.load_img(file_name=exp_file_name)
         return np.nanmedian(data[data != 0])
+
+    def get_target_central_simbad_coords(self):
+        """
+        Function to find central target coordinates from SIMBAD with astroquery
+        Parameters
+        ----------
+
+        Returns
+        -------
+        central_target_coords : astropy.coordinates.SkyCoord
+        """
+        from astroquery.simbad import Simbad
+        # get the center of the target
+        simbad_table = Simbad.query_object(self.target_name)
+        return SkyCoord('%s %s' % (simbad_table['RA'].value[0], simbad_table['DEC'].value[0]),
+                        unit=(u.hourangle, u.deg))
+
+    def get_target_ned_redshift(self):
+        """
+        Function to get redshift from NED with astroquery
+        Parameters
+        ----------
+
+        Returns
+        -------
+        redshift : float
+        """
+
+        from astroquery.ipac.ned import Ned
+        # get the center of the target
+        ned_table = Ned.query_object(self.target_name)
+
+        return ned_table['Redshift'][0]
+
+    def get_target_sys_vel(self):
+        """
+        Function to get target systemic velocity based on NED redshift
+        Parameters
+        ----------
+
+        Returns
+        -------
+        sys_vel : float
+        """
+        from astropy import constants as const
+        cvel= const.c.to('km/s').value
+        redshift = self.get_target_ned_redshift()
+        return redshift * cvel
+
+

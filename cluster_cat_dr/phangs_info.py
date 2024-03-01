@@ -5,7 +5,7 @@ class to gather all information need to access PHANGS observational data product
 
 class PhangsObsInfo:
     """
-    all info are gathered in dictionaries as attributes
+    all info needed for PHANGS observations are gathered in dictionaries as attributes
     """
 
     def __init__(self):
@@ -27,6 +27,12 @@ class PhangsObsInfo:
                                            'ngc3351', 'ngc3621', 'ngc3627', 'ngc4254', 'ngc4298', 'ngc4303', 'ngc4321',
                                            'ngc4535', 'ngc4536', 'ngc4548', 'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689',
                                            'ngc4826', 'ngc5068', 'ngc5248', 'ngc6744', 'ngc7496']
+
+        # Phangs target with existing HST H-alpha observations
+        self.phangs_hst_ha_obs_target_list = ['ngc0628e', 'ngc0628c', 'ngc1087', 'ngc1300', 'ngc1365n', 'ngc1385',
+                                              'ngc1433', 'ngc1566', 'ngc1672', 'ngc3351', 'ngc5068n', 'ngc5068s',
+                                              'ngc7496']
+
         # Phangs target with existing NIRCAM observations
         self.phangs_nircam_obs_target_list = ['ic5332', 'ngc0628', 'ngc1087', 'ngc1300', 'ngc1365', 'ngc1385', 'ngc1433',
                                               'ngc1512', 'ngc1566', 'ngc1672', 'ngc2835', 'ngc3351', 'ngc3627', 'ngc4254',
@@ -46,6 +52,7 @@ class PhangsObsInfo:
                                                    'ngc5248', 'ngc6744', 'ngc7496']
 
         self.hst_ver_folder_names = {'v1.0': 'v1.0'}
+        self.hst_ha_ver_folder_names = {'v1p0': 'phangs-hst-ha_v1p0'}
         self.nircam_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1', 'v0p9p2': 'v0p9p2'}
         self.miri_ver_folder_names = {'v0p9': 'v0p9', 'v0p9p1': 'v0p9p1', 'v0p9p2': 'v0p9p2'}
 
@@ -58,11 +65,13 @@ class PhangsObsInfo:
             'ngc0628e':
                 {'folder_name': 'ngc628e',
                  'acs_wfc1_observed_bands': ['F435W', 'F814W'],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F555W'],
+                 'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']},
             'ngc0628c':
                 {'folder_name': 'ngc628c',
                  'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W'],
+                 'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']},
             'ngc0685':
                 {'folder_name': 'ngc685',
                  'acs_wfc1_observed_bands': [],
@@ -70,7 +79,8 @@ class PhangsObsInfo:
             'ngc1087':
                 {'folder_name': 'ngc1087',
                  'acs_wfc1_observed_bands': [],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W'],
+                 'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']},
             'ngc1097':
                 {'folder_name': 'ngc1097mosaic',
                  'acs_wfc1_observed_bands': [],
@@ -78,7 +88,8 @@ class PhangsObsInfo:
             'ngc1300':
                 {'folder_name': 'ngc1300mosaic',
                  'acs_wfc1_observed_bands': ['F435W', 'F555W', 'F814W'],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W'],
+                 'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']},
             'ngc1317':
                 {'folder_name': 'ngc1317',
                  'acs_wfc1_observed_bands': [],
@@ -90,7 +101,8 @@ class PhangsObsInfo:
             'ngc1365':
                 {'folder_name': 'ngc1365',
                  'acs_wfc1_observed_bands': [],
-                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
+                 'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W'],
+                 'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']},
             'ngc1385':
                 {'folder_name': 'ngc1385',
                  'acs_wfc1_observed_bands': [],
@@ -215,6 +227,23 @@ class PhangsObsInfo:
                 {'folder_name': 'ic5332',
                  'acs_wfc1_observed_bands': [],
                  'wfc3_uvis_observed_bands': ['F275W', 'F336W', 'F438W', 'F555W', 'F814W']},
+        }
+
+        # specification of HST observed galaxies
+        self.phangs_hst_ha_obs_band_dict = {
+            'ngc0628e': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc0628c': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc1087': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N']},
+            'ngc1300': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc1365n': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N']},
+            'ngc1385': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N']},
+            'ngc1433': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N']},
+            'ngc1566': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc1672': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc3351': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc5068n': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc5068s': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F658N']},
+            'ngc7496': {'ha_observed': ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N']},
         }
         # specification of observed bands for each NIRCAM target
         self.nircam_targets = {

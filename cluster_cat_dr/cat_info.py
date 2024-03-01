@@ -416,7 +416,7 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F555W_mJy_TOT_ERR': {'col_name': 'PHANGS_F555W_mJy_TOT_ERR',
+            'PHANGS_F555W_mJy_TOT_ERR': {'col_name': 'PHANGS_F555W_mJy_ERR',
                                          # 'col_name': 'f555w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
@@ -434,7 +434,7 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                                     '`no_coverage_flag\' column.',
                                      'tab_comment': None
                                      },
-            'PHANGS_F814W_mJy_TOT_ERR': {'col_name': 'PHANGS_F814W_mJy_TOT_ERR',
+            'PHANGS_F814W_mJy_TOT_ERR': {'col_name': 'PHANGS_F814W_mJy_ERR',
                                          # 'col_name': 'f814w_mJy_err',
                                          'unit': u.mJy,
                                          'unit_str': 'mJy',
@@ -477,15 +477,15 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
             # Concentration index
             'PHANGS_CI': {'col_name': 'PHANGS_CI',
                           # 'col_name': 'ci',
-                          'unit': None,
-                          'unit_str': 'float',
+                          'unit': u.mag,
+                          'unit_str': 'mag',
                           'doc_comment': 'Concentration index: difference in magnitudes measured in 1 pix and 3 pix '
                                          'radii apertures (r=0.03962", r=3.*0.03962"=0.11886").',
                           'tab_comment': 'Concentration index: difference in magnitudes measured in 1 pix and 3 pix '
                                          'radii apertures.',
                           },
             # Concentration index
-            'cc_class': {'col_name': 'CC_CLASS',
+            'cc_class': {'col_name': 'PHANGS_COLORCOLOR_CLASS_UBVI',
                           'unit': None,
                           'unit_str': 'str',
                           'doc_comment': 'Flag to identify in which region on the color-color diagram the object was '
