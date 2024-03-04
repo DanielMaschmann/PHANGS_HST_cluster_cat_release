@@ -3,7 +3,7 @@ Tool to visualize PHANGS imaging data
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.visualization.wcsaxes import SphericalCircle
@@ -11,7 +11,11 @@ from astropy.stats import SigmaClip
 from photutils.background import Background2D, MedianBackground
 
 from cluster_cat_dr import phot_data_access, helper_func
+
 import multicolorfits as mcf
+
+import matplotlib.pyplot as plt
+from matplotlib import patheffects
 
 
 class PhotVisualize(phot_data_access.PhotAccess):
@@ -300,141 +304,499 @@ class PhotVisualize(phot_data_access.PhotAccess):
 
         return figure
 
-    def plot_ultimate_zoom_in_panel(self, ra_zoom_in, dec_zoom_in, muse_fit_dict=None, env_cutout_size=(10, 10), circle_rad=1.25,
-                                    stamp_cutout_size=(2.5, 2.5)):
+    def plot_ultimate_zoom_in_panel(self, ra_region, dec_region, include_h_alpha=True, ha_cont_sub_stamp_band='ha',
+                                    include_nircam=True,
+                                    include_miri=True,
+                                    muse_fit_dict=None, muse_spec_dict=None,
+                                    env_cutout_size=(10, 10), circle_rad_region=1.25, circle_rad_obj=0.25,
+                                    stamp_cutout_size=(2.5, 2.5), cbar_log_scale=True,
+                                    fontsize_large=30, fontsize_small=20,
+                                    ):
 
+        # load all bands needed
+        band_list = []
+        # load HST bands
+        band_list += self.get_hst_band_list()
+        hst_stamp_band_list = band_list.copy()
         # get BVI filters
-        # specify the bands
+        # specify color the bands
         hst_bvi_band_red = 'F814W'
         hst_bvi_band_green = 'F555W'
-        if 'F438W' in self.phangs_hst_obs_band_dict[self.hst_target_name]['wfc3_uvis_observed_bands']:
+        if 'F438W' in band_list:
             hst_bvi_band_blue = 'F438W'
         else:
             hst_bvi_band_blue = 'F435W'
 
-        # get HST-H-alpha
-        if 'F657N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
-            hst_habu_band_red = 'F657N'
-        elif 'F658N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
-            hst_habu_band_red = 'F658N'
+        # load ha native and continuum subtracted
+        if include_h_alpha:
+            band_list += [ha_cont_sub_stamp_band]
+            # get HST-H-alpha
+            if 'F657N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
+                hst_habu_band_red = 'F657N'
+                band_list += ['F657N']
+                hst_ha_stamp_band = 'F657N'
+            elif 'F658N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
+                hst_habu_band_red = 'F658N'
+                band_list += ['F658N']
+                hst_ha_stamp_band = 'F658N'
+            else:
+                hst_ha_stamp_band = None
+                hst_habu_band_red = None
+            hst_habu_band_green = hst_bvi_band_blue
+            hst_habu_band_blue = 'F336W'
         else:
+            hst_ha_stamp_band = None
             hst_habu_band_red = None
+            hst_habu_band_green = None
+            hst_habu_band_blue = None
+        hst_stamp_band_list = self.sort_band_list(hst_stamp_band_list)
+        if include_nircam:
+            band_list += self.get_nircam_band_list()
+            nircam_stamp_band_list = self.get_nircam_band_list()
+            nircam_band_red = 'F300M'
+            nircam_band_green = 'F335M'
+            nircam_band_blue = 'F200W'
+        else:
+            nircam_stamp_band_list = []
+            nircam_band_red = None
+            nircam_band_green = None
+            nircam_band_blue = None
 
-        hst_habu_band_green = hst_bvi_band_red
-        hst_habu_band_blue = 'F336W'
+        if include_miri:
+            band_list += self.get_miri_band_list()
+            miri_stamp_band_list = self.get_miri_band_list()
+            miri_band_red = 'F1130W'
+            miri_band_green = 'F1000W'
+            miri_band_blue = 'F770W'
+        else:
+            miri_stamp_band_list = []
+            miri_band_red = None
+            miri_band_green = None
+            miri_band_blue = None
 
-        nircam_band_red = 'F300M'
-        nircam_band_green = 'F335M'
-        nircam_band_blue = 'F200W'
-
-        miri_band_red = 'F1130W'
-        miri_band_green = 'F1000W'
-        miri_band_blue = 'F770W'
+        # load all bands into constructor
+        self.load_phangs_bands(band_list=band_list, flux_unit='MJy/sr',)
 
         # get hst_bvi_zoom_in
         img_hst_bvi_overview, wcs_hst_bvi_overview = self.get_target_hst_overview_rgb_img(red_band=hst_bvi_band_red,
                                                                                           green_band=hst_bvi_band_green,
                                                                                           blue_band=hst_bvi_band_blue,
                                                                                           overview_img_size=(500, 500))
-        img_hst_bvi_zoom_in, wcs_hst_bvi_zoom_in = self.get_rgb_zoom_in(ra=ra_zoom_in, dec=dec_zoom_in,
-                                                                        cutout_size=env_cutout_size, circle_rad=circle_rad,
+        img_hst_bvi_zoom_in, wcs_hst_bvi_zoom_in = self.get_rgb_zoom_in(ra=ra_region, dec=dec_region,
+                                                                        cutout_size=env_cutout_size,
+                                                                        circle_rad=circle_rad_region,
                                                                         band_red=hst_bvi_band_red,
                                                                         band_green=hst_bvi_band_green,
                                                                         band_blue=hst_bvi_band_blue)
-        img_hst_habu_zoom_in, wcs_hst_habu_zoom_in = self.get_rgb_zoom_in(ra=ra_zoom_in, dec=dec_zoom_in,
+
+        if include_h_alpha:
+            img_hst_habu_zoom_in, wcs_hst_habu_zoom_in = self.get_rgb_zoom_in(ra=ra_region, dec=dec_region,
+                                                                              cutout_size=env_cutout_size,
+                                                                              circle_rad=circle_rad_region,
+                                                                              band_red=hst_habu_band_red,
+                                                                              band_green=hst_habu_band_green,
+                                                                              band_blue=hst_habu_band_blue)
+        else:
+            img_hst_habu_zoom_in, wcs_hst_habu_zoom_in = None, None
+        if include_nircam:
+            img_nircam_zoom_in, wcs_nircam_zoom_in = self.get_rgb_zoom_in(ra=ra_region, dec=dec_region,
                                                                           cutout_size=env_cutout_size,
-                                                                          circle_rad=circle_rad,
-                                                                          band_red=hst_habu_band_red,
-                                                                          band_green=hst_habu_band_green,
-                                                                          band_blue=hst_habu_band_blue)
-        img_nircam_zoom_in, wcs_nircam_zoom_in = self.get_rgb_zoom_in(ra=ra_zoom_in, dec=dec_zoom_in,
+                                                                          circle_rad=circle_rad_region,
+                                                                          band_red=nircam_band_red,
+                                                                          band_green=nircam_band_green,
+                                                                          band_blue=nircam_band_blue)
+        else:
+            img_nircam_zoom_in, wcs_nircam_zoom_in = None, None
+        if include_miri:
+            img_miri_zoom_in, wcs_miri_zoom_in = self.get_rgb_zoom_in(ra=ra_region, dec=dec_region,
                                                                       cutout_size=env_cutout_size,
-                                                                      circle_rad=circle_rad,
-                                                                      band_red=nircam_band_red,
-                                                                      band_green=nircam_band_green,
-                                                                      band_blue=nircam_band_blue)
-        img_miri_zoom_in, wcs_miri_zoom_in = self.get_rgb_zoom_in(ra=ra_zoom_in, dec=dec_zoom_in,
-                                                                  cutout_size=env_cutout_size,
-                                                                  circle_rad=circle_rad,
-                                                                  band_red=miri_band_red,
-                                                                  band_green=miri_band_green,
-                                                                  band_blue=miri_band_blue)
+                                                                      circle_rad=circle_rad_region,
+                                                                      band_red=miri_band_red,
+                                                                      band_green=miri_band_green,
+                                                                      band_blue=miri_band_blue)
+        else:
+            img_miri_zoom_in, wcs_miri_zoom_in = None, None
+
+        # load cutout stamps
+        cutout_dict_stamp = self.get_band_cutout_dict(ra_cutout=ra_region, dec_cutout=dec_region,
+                                                      cutout_size=stamp_cutout_size,
+                                                      band_list=band_list)
+        # get scales for cutout stamps
+        norm_hst_stamps = helper_func.compute_cbar_norm(cutout_list=[cutout_dict_stamp['%s_img_cutout' % band].data
+                                                                     for band in hst_stamp_band_list],
+                                                        log_scale=cbar_log_scale)
+
+        if include_h_alpha:
+            norm_ha_native_stamp = helper_func.compute_cbar_norm(cutout_list=cutout_dict_stamp['%s_img_cutout' % hst_ha_stamp_band].data,
+                                                               log_scale=cbar_log_scale)
+            norm_ha_cont_sub_stamp = helper_func.compute_cbar_norm(cutout_list=cutout_dict_stamp['%s_img_cutout' % ha_cont_sub_stamp_band].data,
+                                                               log_scale=cbar_log_scale)
+        else:
+            norm_ha_native_stamp = None
+            norm_ha_cont_sub_stamp = None
+
+        if include_nircam:
+            norm_nircam_stamps = helper_func.compute_cbar_norm(cutout_list=[cutout_dict_stamp['%s_img_cutout' % band].data
+                                                                            for band in nircam_stamp_band_list],
+                                                               log_scale=cbar_log_scale)
+        else:
+            norm_nircam_stamps = None
+        if include_nircam:
+            norm_miri_stamps = helper_func.compute_cbar_norm(cutout_list=[cutout_dict_stamp['%s_img_cutout' % band].data
+                                                                          for band in miri_stamp_band_list],
+                                                             log_scale=cbar_log_scale)
+        else:
+            norm_miri_stamp = None
 
         # plotting
-        figure = plt.figure(figsize=(29, 15))
+        figure = plt.figure(figsize=(30, 50))
 
-        fontsize = 25
 
+        # limits for the overview image
         overview_width = 0.45
-        overview_height = 0.95
-        overview_left_align = 0.03
-        overview_bottom_align = 0.03
+        overview_height = 0.45
+        overview_left_align = 0.035
+        overview_bottom_align = 0.628
 
+        # limits for the zoom in panels
         zoom_in_width = 0.24
-        zoom_in_height = 0.47
+        zoom_in_height = 0.24
         zoom_in_left_align = 0.51
-        zoom_in_bottom_align = 0.055
-        space_horizontal = 0.0
-        space_vertical = 0.005
+        zoom_in_bottom_align = 0.66
+        zoom_in_space_horizontal = -0.095
+        zoom_in_space_vertical = 0.005
+
+        # limits for the stamps
+        stamp_width = 0.1
+        stamp_height = 0.1
+        stamp_left_align = 0.035
+        stamp_bottom_align = 0.58
+        stamp_space_horizontal = 0.005
+        stamp_space_vertical = 0.005
+
+        cbar_width = stamp_width * 2
+        cbar_width_hst_ha = stamp_width
+        cbar_height = 0.008
+        c_bar_left_offset = 0.04
+        c_bar_left_offset_hst_ha = 0.0
+        c_bar_top_offset = -0.015
 
         ax_hst_bvi_overview = figure.add_axes([overview_left_align, overview_bottom_align,
                                                overview_width, overview_height],
                                               projection=wcs_hst_bvi_overview)
 
         ax_hst_bvi_zoom_in = figure.add_axes([zoom_in_left_align,
-                                              zoom_in_bottom_align + zoom_in_height + space_horizontal,
+                                              zoom_in_bottom_align + zoom_in_height + zoom_in_space_horizontal,
                                               zoom_in_width, zoom_in_height], projection=wcs_hst_bvi_zoom_in)
-        ax_hst_habu_zoom_in = figure.add_axes([zoom_in_left_align + zoom_in_width + space_vertical,
-                                               zoom_in_bottom_align + zoom_in_height + space_horizontal,
-                                               zoom_in_width, zoom_in_height], projection=wcs_hst_habu_zoom_in)
-        ax_nircam_zoom_in = figure.add_axes([zoom_in_left_align,
-                                             zoom_in_bottom_align, zoom_in_width, zoom_in_height],
-                                            projection=wcs_nircam_zoom_in)
-        ax_miri_zoom_in = figure.add_axes([zoom_in_left_align + zoom_in_width + space_vertical, zoom_in_bottom_align,
-                                           zoom_in_width, zoom_in_height], projection=wcs_miri_zoom_in)
 
+        if include_h_alpha:
+            ax_hst_habu_zoom_in = figure.add_axes([zoom_in_left_align + zoom_in_width + zoom_in_space_vertical,
+                                                   zoom_in_bottom_align + zoom_in_height + zoom_in_space_horizontal,
+                                                   zoom_in_width, zoom_in_height], projection=wcs_hst_habu_zoom_in)
+        else:
+            ax_hst_habu_zoom_in = None
+        if include_nircam:
+            ax_nircam_zoom_in = figure.add_axes([zoom_in_left_align,
+                                                 zoom_in_bottom_align, zoom_in_width, zoom_in_height],
+                                                projection=wcs_nircam_zoom_in)
+        else:
+            ax_nircam_zoom_in = None
+        if include_miri:
+            ax_miri_zoom_in = figure.add_axes([zoom_in_left_align + zoom_in_width + zoom_in_space_vertical, zoom_in_bottom_align,
+                                               zoom_in_width, zoom_in_height], projection=wcs_miri_zoom_in)
+        else:
+            ax_miri_zoom_in = None
+
+        # plot the RGB images
         ax_hst_bvi_overview.imshow(img_hst_bvi_overview)
-        ax_hst_bvi_zoom_in.imshow(img_hst_bvi_zoom_in)
-        ax_hst_habu_zoom_in.imshow(img_hst_habu_zoom_in)
-        ax_nircam_zoom_in.imshow(img_nircam_zoom_in)
-        ax_miri_zoom_in.imshow(img_miri_zoom_in)
-
+        pe = [patheffects.withStroke(linewidth=3, foreground="w")]
+        ax_hst_bvi_overview.text(0.02, 0.98, 'HST', horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='white',
+                                 transform=ax_hst_bvi_overview.transAxes, path_effects=pe)
+        ax_hst_bvi_overview.text(0.02, 0.95, hst_bvi_band_red.upper(), horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='red',
+                                 transform=ax_hst_bvi_overview.transAxes, path_effects=pe)
+        ax_hst_bvi_overview.text(0.02, 0.92, hst_bvi_band_green.upper(), horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='green',
+                                 transform=ax_hst_bvi_overview.transAxes, path_effects=pe)
+        ax_hst_bvi_overview.text(0.02, 0.89, hst_bvi_band_blue.upper(), horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='blue',
+                                 transform=ax_hst_bvi_overview.transAxes, path_effects=pe)
+        ax_hst_bvi_overview.set_title(self.target_name.upper(), fontsize=fontsize_large + 10)
         self.arr_axis_params(ax=ax_hst_bvi_overview, ra_tick_label=True, dec_tick_label=True,
                         ra_axis_label='R.A. (2000.0)', dec_axis_label='DEC. (2000.0)',
                         ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
-                        fontsize=fontsize, labelsize=fontsize, ra_tick_num=3, dec_tick_num=3)
+                        fontsize=fontsize_large, labelsize=fontsize_large, ra_tick_num=3, dec_tick_num=3)
+        helper_func.draw_box(ax=ax_hst_bvi_overview, wcs=wcs_hst_bvi_overview,
+                             coord=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                             box_size=env_cutout_size, color='red', line_width=2, line_style='--')
+        helper_func.plot_coord_circle(ax=ax_hst_bvi_zoom_in, pos=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                      rad=circle_rad_region, color='white', line_style='-', line_width=2, alpha=1., fill=False)
 
+        ax_hst_bvi_zoom_in.imshow(img_hst_bvi_zoom_in)
+        ax_hst_bvi_zoom_in.text(0.02, 0.98, 'HST', horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='white',
+                                 transform=ax_hst_bvi_zoom_in.transAxes, path_effects=pe)
+        ax_hst_bvi_zoom_in.text(0.02, 0.92, hst_bvi_band_red.upper(), horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='red',
+                                 transform=ax_hst_bvi_zoom_in.transAxes, path_effects=pe)
+        ax_hst_bvi_zoom_in.text(0.02, 0.86, hst_bvi_band_green.upper(), horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='green',
+                                 transform=ax_hst_bvi_zoom_in.transAxes, path_effects=pe)
+        ax_hst_bvi_zoom_in.text(0.02, 0.80, hst_bvi_band_blue.upper(), horizontalalignment='left', verticalalignment='top',
+                                 fontsize=fontsize_large, color='blue',
+                                 transform=ax_hst_bvi_zoom_in.transAxes, path_effects=pe)
+        helper_func.draw_box(ax=ax_hst_bvi_zoom_in, wcs=wcs_hst_bvi_zoom_in,
+                             coord=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                             box_size=stamp_cutout_size, color='red', line_width=2, line_style='--')
         self.arr_axis_params(ax=ax_hst_bvi_zoom_in, ra_tick_label=False, dec_tick_label=True,
                         ra_axis_label=' ', dec_axis_label=' ',
                         ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
-                        fontsize=fontsize, labelsize=fontsize, ra_tick_num=3, dec_tick_num=3)
-        self.arr_axis_params(ax=ax_hst_habu_zoom_in, ra_tick_label=False, dec_tick_label=False,
+                        fontsize=fontsize_large, labelsize=fontsize_large, ra_tick_num=3, dec_tick_num=3)
+        if include_h_alpha:
+            ax_hst_habu_zoom_in.imshow(img_hst_habu_zoom_in)
+            self.arr_axis_params(ax=ax_hst_habu_zoom_in, ra_tick_label=False, dec_tick_label=False,
+                            ra_axis_label=' ', dec_axis_label=' ',
+                            ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
+                            fontsize=fontsize_large, labelsize=fontsize_large, ra_tick_num=3, dec_tick_num=3)
+            ax_hst_habu_zoom_in.imshow(img_hst_habu_zoom_in)
+            ax_hst_habu_zoom_in.text(0.02, 0.98, 'HST', horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='white',
+                                     transform=ax_hst_habu_zoom_in.transAxes, path_effects=pe)
+            ax_hst_habu_zoom_in.text(0.02, 0.92, hst_habu_band_red.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='red',
+                                     transform=ax_hst_habu_zoom_in.transAxes, path_effects=pe)
+            ax_hst_habu_zoom_in.text(0.02, 0.86, hst_habu_band_green.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='green',
+                                     transform=ax_hst_habu_zoom_in.transAxes, path_effects=pe)
+            ax_hst_habu_zoom_in.text(0.02, 0.80, hst_habu_band_blue.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='blue',
+                                     transform=ax_hst_habu_zoom_in.transAxes, path_effects=pe)
+            helper_func.draw_box(ax=ax_hst_habu_zoom_in, wcs=wcs_hst_habu_zoom_in,
+                                 coord=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                 box_size=stamp_cutout_size, color='red', line_width=2, line_style='--')
+            helper_func.plot_coord_circle(ax=ax_hst_habu_zoom_in, pos=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                          rad=circle_rad_region, color='white', line_style='-', line_width=2, alpha=1., fill=False)
+        if include_nircam:
+            ax_nircam_zoom_in.imshow(img_nircam_zoom_in)
+            self.arr_axis_params(ax=ax_nircam_zoom_in, ra_tick_label=True, dec_tick_label=True,
+                            ra_axis_label=' ', dec_axis_label=' ',
+                            ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
+                            fontsize=fontsize_large, labelsize=fontsize_large, ra_tick_num=3, dec_tick_num=3)
+            ax_nircam_zoom_in.text(0.02, 0.98, 'NIRCAM', horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='white',
+                                     transform=ax_nircam_zoom_in.transAxes, path_effects=pe)
+            ax_nircam_zoom_in.text(0.02, 0.92, nircam_band_red.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='red',
+                                     transform=ax_nircam_zoom_in.transAxes, path_effects=pe)
+            ax_nircam_zoom_in.text(0.02, 0.86, nircam_band_green.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='green',
+                                     transform=ax_nircam_zoom_in.transAxes, path_effects=pe)
+            ax_nircam_zoom_in.text(0.02, 0.80, nircam_band_blue.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='blue',
+                                     transform=ax_nircam_zoom_in.transAxes, path_effects=pe)
+            helper_func.draw_box(ax=ax_nircam_zoom_in, wcs=wcs_nircam_zoom_in,
+                                 coord=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                 box_size=stamp_cutout_size, color='red', line_width=2, line_style='--')
+            helper_func.plot_coord_circle(ax=ax_nircam_zoom_in, pos=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                          rad=circle_rad_region, color='white', line_style='-', line_width=2, alpha=1., fill=False)
+        if include_miri:
+            ax_miri_zoom_in.imshow(img_miri_zoom_in)
+            self.arr_axis_params(ax=ax_miri_zoom_in, ra_tick_label=True, dec_tick_label=False,
+                            ra_axis_label=' ', dec_axis_label=' ',
+                            ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
+                            fontsize=fontsize_large, labelsize=fontsize_large, ra_tick_num=3, dec_tick_num=3)
+            ax_miri_zoom_in.text(0.02, 0.98, 'MIRI', horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='white',
+                                     transform=ax_miri_zoom_in.transAxes, path_effects=pe)
+            ax_miri_zoom_in.text(0.02, 0.92, miri_band_red.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='red',
+                                     transform=ax_miri_zoom_in.transAxes, path_effects=pe)
+            ax_miri_zoom_in.text(0.02, 0.86, miri_band_green.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='green',
+                                     transform=ax_miri_zoom_in.transAxes, path_effects=pe)
+            ax_miri_zoom_in.text(0.02, 0.80, miri_band_blue.upper(), horizontalalignment='left', verticalalignment='top',
+                                     fontsize=fontsize_large, color='blue',
+                                     transform=ax_miri_zoom_in.transAxes, path_effects=pe)
+            helper_func.draw_box(ax=ax_miri_zoom_in, wcs=wcs_miri_zoom_in,
+                                 coord=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                 box_size=stamp_cutout_size, color='red', line_width=2, line_style='--')
+            helper_func.plot_coord_circle(ax=ax_miri_zoom_in, pos=SkyCoord(ra=ra_region*u.deg, dec=dec_region*u.deg),
+                                          rad=circle_rad_region, color='white', line_style='-', line_width=2, alpha=1., fill=False)
+
+        # add stamp axis
+        stamp_row_count_down = 0
+        # add stamp axis for hst
+        ax_hst_stamp_list = []
+        hst_stamp_index = 0
+        if cbar_log_scale:
+            cbar_label = r'log(S /[MJy / sr])'
+        else:
+            cbar_label = r'S [MJy / sr]'
+
+        for hst_stamp_index, hst_stamp_band in enumerate(hst_stamp_band_list):
+
+            ax_hst_stamp_list.append(
+                figure.add_axes([stamp_left_align + hst_stamp_index*(stamp_width + stamp_space_vertical),
+                                 stamp_bottom_align + stamp_row_count_down*(stamp_height + stamp_space_horizontal),
+                                 stamp_width, stamp_height],
+                                projection=cutout_dict_stamp['%s_img_cutout' % hst_stamp_band].wcs))
+            ax_hst_stamp_list[hst_stamp_index].imshow(cutout_dict_stamp['%s_img_cutout' % hst_stamp_band].data,
+                                            norm=norm_hst_stamps, cmap='Greys')
+            ax_hst_stamp_list[hst_stamp_index].set_title(hst_stamp_band.upper(), fontsize=fontsize_large)
+            if hst_stamp_index == 0:
+                ra_tick_label, dec_tick_label = True, True
+            else:
+                ra_tick_label, dec_tick_label = False, False
+            self.arr_axis_params(ax=ax_hst_stamp_list[hst_stamp_index], ra_tick_label=ra_tick_label,
+                                 dec_tick_label=dec_tick_label, ra_axis_label=' ', dec_axis_label=' ',
+                                 fontsize=fontsize_small, labelsize=fontsize_small)
+
+        ax_hst_cbar = figure.add_axes([stamp_left_align + c_bar_left_offset,
+                                       stamp_bottom_align + (stamp_row_count_down+1)*(stamp_height + stamp_space_horizontal) + c_bar_top_offset,
+                                       cbar_width, cbar_height])
+        helper_func.create_cbar(ax_cbar=ax_hst_cbar, cmap='Greys', norm=norm_hst_stamps, cbar_label=cbar_label,
+                                fontsize=fontsize_large, ticks=None, labelpad=2, tick_width=2, orientation='horizontal',
+                                extend='neither')
+
+        if include_h_alpha:
+            ax_hst_ha_stamp = figure.add_axes([stamp_left_align + (hst_stamp_index + 2)*(stamp_width + stamp_space_vertical),
+                                 stamp_bottom_align + stamp_row_count_down*(stamp_height + stamp_space_horizontal),
+                                 stamp_width, stamp_height],
+                                projection=cutout_dict_stamp['%s_img_cutout' % hst_ha_stamp_band].wcs)
+            ax_hst_ha_stamp.imshow(cutout_dict_stamp['%s_img_cutout' % hst_ha_stamp_band].data,
+                                   norm=norm_ha_native_stamp, cmap='Greys')
+            ax_hst_ha_stamp.set_title(hst_ha_stamp_band.upper(), fontsize=fontsize_large)
+            self.arr_axis_params(ax=ax_hst_ha_stamp, ra_tick_label=True, dec_tick_label=True,
+                        ra_axis_label=' ', dec_axis_label=' ',
+                        ra_minpad=0.8, dec_minpad=0.8, tick_color='k', label_color='k',
+                        fontsize=fontsize_small, labelsize=fontsize_small, ra_tick_num=3, dec_tick_num=3)
+            ax_hst_ha_cbar = figure.add_axes([stamp_left_align + (hst_stamp_index + 2)*(stamp_width + stamp_space_vertical) + c_bar_left_offset_hst_ha,
+                                              stamp_bottom_align + (stamp_row_count_down+1)*(stamp_height + stamp_space_horizontal) + c_bar_top_offset,
+                                              cbar_width_hst_ha, cbar_height])
+            print(norm_ha_native_stamp.vmin)
+            print(norm_ha_native_stamp.vmax)
+            helper_func.create_cbar(ax_cbar=ax_hst_ha_cbar, cmap='Greys', norm=norm_ha_native_stamp,
+                                    cbar_label=cbar_label, fontsize=fontsize_large, orientation='horizontal',
+                                    extend='neither')
+
+
+            ax_hst_ha_cont_sub_stamp = figure.add_axes([stamp_left_align + (hst_stamp_index + 4)*(stamp_width + stamp_space_vertical),
+                                 stamp_bottom_align + stamp_row_count_down*(stamp_height + stamp_space_horizontal),
+                                 stamp_width, stamp_height],
+                                projection=cutout_dict_stamp['%s_img_cutout' % ha_cont_sub_stamp_band].wcs)
+            ax_hst_ha_cont_sub_stamp.imshow(cutout_dict_stamp['%s_img_cutout' % ha_cont_sub_stamp_band].data,
+                                   norm=norm_ha_cont_sub_stamp, cmap='Greys')
+            ax_hst_ha_cont_sub_stamp.set_title(ha_cont_sub_stamp_band.upper(), fontsize=fontsize_large)
+            self.arr_axis_params(ax=ax_hst_ha_cont_sub_stamp, ra_tick_label=True, dec_tick_label=True,
+                        ra_axis_label=' ', dec_axis_label=' ',
+                        ra_minpad=0.8, dec_minpad=0.8, tick_color='k', label_color='k',
+                        fontsize=fontsize_small, labelsize=fontsize_small, ra_tick_num=3, dec_tick_num=3)
+            ax_hst_ha_cont_sub_cbar = figure.add_axes([stamp_left_align + (hst_stamp_index + 4)*(stamp_width + stamp_space_vertical) + c_bar_left_offset_hst_ha,
+                                           stamp_bottom_align + (stamp_row_count_down+1)*(stamp_height + stamp_space_horizontal) + c_bar_top_offset,
+                                           cbar_width_hst_ha, cbar_height],)
+            helper_func.create_cbar(ax_cbar=ax_hst_ha_cont_sub_cbar, cmap='Greys', norm=norm_ha_cont_sub_stamp,
+                                    cbar_label=cbar_label, fontsize=fontsize_large, orientation='horizontal',
+                                    extend='neither')
+
+        nircam_stamp_index = 0
+        if include_nircam:
+            stamp_row_count_down -= 1
+            ax_nircam_stamp_list = []
+            for nircam_stamp_index, nircam_stamp_band in enumerate(nircam_stamp_band_list):
+
+                ax_nircam_stamp_list.append(
+                    figure.add_axes([stamp_left_align + nircam_stamp_index*(stamp_width + stamp_space_vertical),
+                                     stamp_bottom_align + stamp_row_count_down*(stamp_height + stamp_space_horizontal),
+                                     stamp_width, stamp_height],
+                                    projection=cutout_dict_stamp['%s_img_cutout' % nircam_stamp_band].wcs))
+                ax_nircam_stamp_list[nircam_stamp_index].imshow(cutout_dict_stamp['%s_img_cutout' % nircam_stamp_band].data,
+                                                norm=norm_nircam_stamps, cmap='Greys')
+                ax_nircam_stamp_list[nircam_stamp_index].set_title(nircam_stamp_band.upper(), fontsize=fontsize_large)
+                if nircam_stamp_index == 0:
+                    ra_tick_label, dec_tick_label = True, True
+                else:
+                    ra_tick_label, dec_tick_label = False, False
+                self.arr_axis_params(ax=ax_nircam_stamp_list[nircam_stamp_index], ra_tick_label=ra_tick_label,
+                                     dec_tick_label=dec_tick_label, ra_axis_label=' ', dec_axis_label=' ',
+                                     fontsize=fontsize_small, labelsize=fontsize_small)
+
+            ax_nircam_cbar = figure.add_axes([stamp_left_align + c_bar_left_offset,
+                                           stamp_bottom_align + (stamp_row_count_down+1)*(stamp_height + stamp_space_horizontal) + c_bar_top_offset,
+                                           cbar_width, cbar_height],)
+            helper_func.create_cbar(ax_cbar=ax_nircam_cbar, cmap='Greys', norm=norm_nircam_stamps, cbar_label=cbar_label,
+                                    fontsize=fontsize_large, ticks=None, labelpad=2, tick_width=2, orientation='horizontal',
+                                    extend='neither')
+
+        if include_miri:
+            # stamp_row_count_down -= 1
+            ax_miri_stamp_list = []
+            for miri_stamp_index, miri_stamp_band in enumerate(miri_stamp_band_list):
+
+                ax_miri_stamp_list.append(
+                    figure.add_axes([stamp_left_align + (nircam_stamp_index + miri_stamp_index + 2)*(stamp_width + stamp_space_vertical),
+                                     stamp_bottom_align + stamp_row_count_down*(stamp_height + stamp_space_horizontal),
+                                     stamp_width, stamp_height],
+                                    projection=cutout_dict_stamp['%s_img_cutout' % miri_stamp_band].wcs))
+                ax_miri_stamp_list[miri_stamp_index].imshow(cutout_dict_stamp['%s_img_cutout' % miri_stamp_band].data,
+                                                norm=norm_miri_stamps, cmap='Greys')
+                ax_miri_stamp_list[miri_stamp_index].set_title(miri_stamp_band.upper(), fontsize=fontsize_large)
+                if miri_stamp_index == 0:
+                    ra_tick_label, dec_tick_label = True, True
+                else:
+                    ra_tick_label, dec_tick_label = False, False
+                self.arr_axis_params(ax=ax_miri_stamp_list[miri_stamp_index], ra_tick_label=ra_tick_label,
+                                     dec_tick_label=dec_tick_label, ra_axis_label=' ', dec_axis_label=' ',
+                                     fontsize=fontsize_small, labelsize=fontsize_small)
+
+            ax_miri_cbar = figure.add_axes([stamp_left_align + (nircam_stamp_index + 2)*(stamp_width + stamp_space_vertical) + c_bar_left_offset,
+                                           stamp_bottom_align + (stamp_row_count_down+1)*(stamp_height + stamp_space_horizontal) + c_bar_top_offset,
+                                           cbar_width, cbar_height],)
+            helper_func.create_cbar(ax_cbar=ax_miri_cbar, cmap='Greys', norm=norm_miri_stamps, cbar_label=cbar_label,
+                                    fontsize=fontsize_large, ticks=None, labelpad=2, tick_width=2, orientation='horizontal',
+                    extend='neither')
+
+        # plot muse fit
+        # 'wavelength': wavelength, 'total_flux': total_flux, 'total_flux_err': total_flux_err,
+        # 'best_fit': best_fit, 'gas_best_fit': gas_best_fit, 'continuum_best_fit': continuum_best_fit,
+        # 'pp': pp, 'ages': ages, 'met': met, 'mass2light': mass2light}
+
+        # add axis
+        ax_muse_spec = figure.add_axes([0.065, 0.025, 0.94, 0.2])
+        ax_muse_stamp = figure.add_axes([0.8, 0.13, 0.18, 0.18], projection=muse_spec_dict['cutout_muse'].wcs)
+
+        # plot spectrum
+        ax_muse_spec.errorbar(muse_fit_dict['wavelength'], muse_fit_dict['total_flux'] * 1e-4,
+                              yerr=muse_fit_dict['total_flux_err'] * 1e-4, fmt='.', color='k', label='Data')
+        ax_muse_spec.plot(muse_fit_dict['wavelength'], muse_fit_dict['best_fit'] * 1e-4, color='tab:blue', label='Best fit')
+        ax_muse_spec.plot(muse_fit_dict['wavelength'], muse_fit_dict['continuum_best_fit'] * 1e-4, color='tab:orange',
+                          label='Stellar continuum')
+        # ax_muse_spec.plot(muse_fit_dict['wavelength'], muse_fit_dict['gas_best_fit'])
+        # get limits
+        ax_muse_spec.set_xlim(np.nanmin(muse_fit_dict['wavelength']) - 10,
+                              np.nanmax(muse_fit_dict['wavelength']) + 10)
+        min_cont = np.nanmin(muse_fit_dict['continuum_best_fit'] * 1e-4)
+        max_cont = np.nanmax(muse_fit_dict['continuum_best_fit'] * 1e-4)
+        ax_muse_spec.set_ylim(min_cont - 0.05*(max_cont - min_cont), max_cont + 0.05*(max_cont - min_cont))
+        ax_muse_spec.legend(frameon=False, fontsize=fontsize_large)
+
+        ax_muse_spec.tick_params(axis='both', which='both', width=2, direction='in', labelsize=fontsize_large)
+        ax_muse_spec.set_xlabel(r'Wavelength [$\AA$]', fontsize=fontsize_large)
+
+        ax_muse_spec.set_ylabel(r'Flux density [10$^{-16}$ erg cm$^{-2}$ s$^{-1}$ $\AA^{-1}$]', fontsize=fontsize_large)
+
+
+
+        norm_muse_stamps = helper_func.compute_cbar_norm(cutout_list=[muse_spec_dict['cutout_muse'].data],
+                                                         log_scale=cbar_log_scale)
+        ax_muse_stamp.imshow(muse_spec_dict['cutout_muse'].data, norm=norm_muse_stamps)
+        self.arr_axis_params(ax=ax_muse_stamp, ra_tick_label=True, dec_tick_label=True,
                         ra_axis_label=' ', dec_axis_label=' ',
                         ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
-                        fontsize=fontsize, labelsize=fontsize, ra_tick_num=3, dec_tick_num=3)
-        self.arr_axis_params(ax=ax_nircam_zoom_in, ra_tick_label=True, dec_tick_label=True,
-                        ra_axis_label='R.A. (2000.0)', dec_axis_label=' ',
-                        ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
-                        fontsize=fontsize, labelsize=fontsize, ra_tick_num=3, dec_tick_num=3)
-        self.arr_axis_params(ax=ax_miri_zoom_in, ra_tick_label=True, dec_tick_label=False,
-                        ra_axis_label='R.A. (2000.0)', dec_axis_label=' ',
-                        ra_minpad=0.8, dec_minpad=0.8, tick_color='white', label_color='k',
-                        fontsize=fontsize, labelsize=fontsize, ra_tick_num=3, dec_tick_num=3)
-
-        helper_func.draw_box(ax=ax_hst_bvi_overview, wcs=wcs_hst_bvi_overview,
-                             coord=SkyCoord(ra=ra_zoom_in*u.deg, dec=dec_zoom_in*u.deg),
-                             box_size=env_cutout_size, color='red', line_width=2, line_style='--')
-
-        helper_func.plot_coord_circle(ax=ax_hst_bvi_zoom_in, pos=SkyCoord(ra=ra_zoom_in*u.deg, dec=dec_zoom_in*u.deg),
-                                      rad=circle_rad, color='white', line_style='-', line_width=2, alpha=1., fill=False)
-        helper_func.plot_coord_circle(ax=ax_hst_habu_zoom_in, pos=SkyCoord(ra=ra_zoom_in*u.deg, dec=dec_zoom_in*u.deg),
-                                      rad=circle_rad, color='white', line_style='-', line_width=2, alpha=1., fill=False)
-        helper_func.plot_coord_circle(ax=ax_nircam_zoom_in, pos=SkyCoord(ra=ra_zoom_in*u.deg, dec=dec_zoom_in*u.deg),
-                                      rad=circle_rad, color='white', line_style='-', line_width=2, alpha=1., fill=False)
-        helper_func.plot_coord_circle(ax=ax_miri_zoom_in, pos=SkyCoord(ra=ra_zoom_in*u.deg, dec=dec_zoom_in*u.deg),
-                                      rad=circle_rad, color='white', line_style='-', line_width=2, alpha=1., fill=False)
+                        fontsize=fontsize_large, labelsize=fontsize_large, ra_tick_num=3, dec_tick_num=3)
 
         figure.savefig('plot_output/example_ultimate_zoom.png')
+        figure.clf()
 
     def get_rgb_zoom_in(self, ra, dec, cutout_size, circle_rad, band_red, band_green, band_blue, ref_band='blue'):
         """
@@ -589,7 +951,6 @@ class PhotVisualize(phot_data_access.PhotAccess):
                                    combined_gamma=17.5)
 
         return hst_rgb, new_wcs
-
 
     @staticmethod
     def get_image_scale_with_circle(img_data, img_wcs, ra, dec, circle_rad=0.16, box_scaling=1/5, filter_scaling=1/10):

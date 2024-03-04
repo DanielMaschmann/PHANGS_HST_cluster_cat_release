@@ -1036,6 +1036,10 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         from astropy import constants as const
         cvel= const.c.to('km/s').value
         redshift = self.get_target_ned_redshift()
-        return redshift * cvel
+        # print(redshift)
+        # print(redshift * cvel)
+        # print(np.log(redshift+1) * cvel)
+        # exit()
+        return np.log(redshift+1) * cvel
 
 
