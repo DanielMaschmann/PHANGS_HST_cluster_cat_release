@@ -22,8 +22,81 @@ speed_of_light_kmps = const.c.to('km/s').value
 from reproject import reproject_interp
 from TardisPipeline.readData.MUSE_WFM import get_MUSE_polyFWHM
 import ppxf.ppxf_util as util
+from scipy import odr
+import sep
 
 import numpy as np
+
+from os import path
+import ppxf.sps_util as lib
+from urllib import request
+from ppxf.ppxf import ppxf
+
+from astropy.convolution import Gaussian2DKernel, convolve
+from scipy.stats import gaussian_kde
+from matplotlib import cm
+import photometry_tools
+import dust_tools.extinction_tools
+
+
+def download_file(file_path, url, unpack=False, reload=False):
+    """
+
+    Parameters
+    ----------
+    file_path : str or ``pathlib.Path``
+    url : str
+    unpack : bool
+        In case the downloaded file is zipped, this function can unpack it and remove the downloaded file,
+        leaving only the extracted file
+    reload : bool
+        If the file is corrupted, this removes the file and reloads it
+
+    Returns
+    -------
+
+    """
+    if reload:
+        # if reload file the file will be removed to re download it
+        os.remove(file_path)
+    # check if file already exists
+    if os.path.isfile(file_path):
+        print(file_path, 'already exists')
+        return True
+    else:
+        from urllib3 import PoolManager
+        # download file
+        http = PoolManager()
+        r = http.request('GET', url, preload_content=False)
+
+        if unpack:
+            with open(file_path.with_suffix(".gz"), 'wb') as out:
+                while True:
+                    data = r.read()
+                    if not data:
+                        break
+                    out.write(data)
+            r.release_conn()
+            # uncompress file
+            from gzip import GzipFile
+            # read compressed file
+            compressed_file = GzipFile(file_path.with_suffix(".gz"), 'rb')
+            s = compressed_file.read()
+            compressed_file.close()
+            # save compressed file
+            uncompressed_file = open(file_path, 'wb')
+            uncompressed_file.write(s)
+            uncompressed_file.close()
+            # delete compressed file
+            os.remove(file_path.with_suffix(".gz"))
+        else:
+            with open(file_path, 'wb') as out:
+                while True:
+                    data = r.read()
+                    if not data:
+                        break
+                    out.write(data)
+            r.release_conn()
 
 
 def identify_file_in_folder(folder_path, str_in_file_name_1, str_in_file_name_2=None):
@@ -324,7 +397,48 @@ def plot_coord_circle(ax, pos, rad, color, line_style='-', line_width=3, alpha=1
         ax.add_patch(circle)
 
 
-def load_muse_data(muse_cube_path):
+def extract_flux_from_circ_aperture(data, wcs, pos, aperture_rad, data_err=None):
+    """
+
+    Parameters
+    ----------
+    data : ``numpy.ndarray``
+    wcs : ``astropy.wcs.WCS``
+    pos : ``astropy.coordinates.SkyCoord``
+    aperture_rad : float
+    data_err : ``numpy.ndarray``
+
+    Returns
+    -------
+    flux : float
+    flux_err : float
+    """
+    # estimate background
+    bkg = sep.Background(np.array(data, dtype=float))
+    # get radius in pixel scale
+    pix_radius = transform_world2pix_scale(length_in_arcsec=aperture_rad, wcs=wcs, dim=1)
+    # pix_radius_old = (wcs.world_to_pixel(pos)[0] -
+    #               wcs.world_to_pixel(SkyCoord(ra=pos.ra + aperture_rad * u.arcsec, dec=pos.dec))[0])
+    # print(pix_radius)
+    # print(pix_radius_old)
+    # exit()
+    # get the coordinates in pixel scale
+    pixel_coords = wcs.world_to_pixel(pos)
+
+    data = np.array(data.byteswap().newbyteorder(), dtype=float)
+    if data_err is None:
+        bkg_rms = bkg.rms()
+        data_err = np.array(bkg_rms.byteswap().newbyteorder(), dtype=float)
+    else:
+        data_err = np.array(data_err.byteswap().newbyteorder(), dtype=float)
+
+    flux, flux_err, flag = sep.sum_circle(data=data - bkg.globalback, x=np.array([float(pixel_coords[0])]),
+                                          y=np.array([float(pixel_coords[1])]), r=np.array([float(pix_radius)]),
+                                          err=data_err)
+
+    return float(flux), float(flux_err)
+
+def load_muse_cube(muse_cube_path):
     # get MUSE data
     muse_hdu = fits.open(muse_cube_path)
     # get header
@@ -337,10 +451,21 @@ def load_muse_data(muse_cube_path):
     # get WCS
     wcs_muse = WCS(hdr).celestial
 
+    muse_hdu.close()
+
     muse_data_dict = {'wave_muse': wave_muse, 'data_cube_muse': data_cube_muse,
                       'var_cube_muse': var_cube_muse, 'wcs_muse': wcs_muse, 'hdr_muse': hdr}
 
     return muse_data_dict
+
+
+def load_muse_dap_map(muse_dap_map_path, map='HA6562_FLUX'):
+    # get MUSE data
+    muse_hdu = fits.open(muse_dap_map_path)
+    muse_map_data = muse_hdu[map].data
+    muse_map_wcs = WCS(muse_hdu[map].header)
+    muse_hdu.close()
+    return {'muse_map_data': muse_map_data, 'muse_map_wcs': muse_map_wcs}
 
 
 def extract_muse_spec_circ_app(muse_data_dict, ra, dec, circ_rad, cutout_size, wave_range=None):
@@ -375,12 +500,8 @@ def extract_muse_spec_circ_app(muse_data_dict, ra, dec, circ_rad, cutout_size, w
     lsf = lsf[mask_wave_range]
     good_pixel_mask = np.invert(np.isnan(spec_flux) + np.isinf(spec_flux))
 
-    # get cutout to visualize
-    cutout_muse = get_img_cutout(img=np.nansum(muse_data_dict['data_cube_muse'], axis=0),
-                                 wcs=muse_data_dict['wcs_muse'], coord=obj_coords_world, cutout_size=cutout_size)
-
     return {'lam_range': lam_range, 'spec_flux': spec_flux, 'spec_flux_err': spec_flux_err, 'lam': lam,
-            'lsf': lsf, 'good_pixel_mask': good_pixel_mask, 'cutout_muse': cutout_muse}
+            'lsf': lsf, 'good_pixel_mask': good_pixel_mask}
 
 
 def fit_ppxf2spec(spec_dict, redshift, sps_name='fsps', age_range=None, metal_range=None):
@@ -398,49 +519,24 @@ def fit_ppxf2spec(spec_dict, redshift, sps_name='fsps', age_range=None, metal_ra
     -------
     dict
     """
-    from os import path
-    import ppxf.sps_util as lib
-    from urllib import request
-    from ppxf.ppxf import ppxf
-    import matplotlib.pyplot as plt
 
-    # plt.plot(spec_dict['lam'], spec_dict['spec_flux'])
-    # plt.show()
-    # rebin spectra
-    # good_spec = np.invert(np.isnan(spec_dict['spec_flux']) + np.isnan(spec_dict['spec_flux_err']) + np.isinf(spec_dict['spec_flux']) + np.isinf(spec_dict['spec_flux_err']))
-    # print(spec_dict['lam_range'])
-    # spec_dict['spec_flux'] = spec_dict['spec_flux'][good_spec]
-    # spec_dict['lam'] = spec_dict['lam'][good_spec]
-    # spec_dict['spec_flux_err'] = spec_dict['spec_flux_err'][good_spec]
-    # spec_dict['lam_range'] = [np.min(spec_dict['lam'][np.invert(np.isnan(spec_dict['spec_flux']))]),
-    #                           np.max(spec_dict['lam'][np.invert(np.isnan(spec_dict['spec_flux']))])]
-    # spec_dict['lsf'] = spec_dict['lsf'][good_spec]
-    # print(spec_dict['lam_range'])
-    # print(util.vac_to_air(spec_dict['lam']))
-    # spec_dict['lam'] = util.vac_to_air(spec_dict['lam'])
+    import matplotlib.pyplot as plt
+    spec_dict['spec_flux'] *= 1e-20
+    spec_dict['spec_flux_err'] *= 1e-20
 
     velscale = speed_of_light_kmps * np.diff(np.log(spec_dict['lam'][-2:]))[0]  # Smallest velocity step
+    # print('velscale ', velscale)
     # velscale = speed_of_light_kmps*np.log(spec_dict['lam'][1]/spec_dict['lam'][0])
-
-    spectra_muse, ln_lam_gal, velscale = util.log_rebin(lam=spec_dict['lam_range'], spec=spec_dict['spec_flux'],
+    # print('velscale ', velscale)
+    # velscale = 10
+    spectra_muse, ln_lam_gal, velscale = util.log_rebin(lam=spec_dict['lam'], spec=spec_dict['spec_flux'],
                                                         velscale=velscale)
-    spectra_muse_err, ln_lam_gal, velscale = util.log_rebin(lam=spec_dict['lam_range'],
+    spectra_muse_err, ln_lam_gal, velscale = util.log_rebin(lam=spec_dict['lam'],
                                                             spec=spec_dict['spec_flux_err'], velscale=velscale)
-
-    # print(sum(np.isnan(spec_dict['spec_flux'])))
-    # print(sum(np.isnan(spectra_muse)))
-    #
-    # plt.plot(ln_lam_gal, spectra_muse_err)
-    # plt.show()
 
     lsf_dict = {"lam": spec_dict['lam'], "fwhm": spec_dict['lsf']}
     # get new wavelength array
     lam_gal = np.exp(ln_lam_gal)
-    # goodpixels = util.determine_goodpixels(ln_lam=ln_lam_gal, lam_range_temp=spec_dict['lam_range'], z=redshift)
-    goodpixels = None
-    # goodpixels = (np.isnan(spectra_muse) + np.isnan(spectra_muse_err) + np.isinf(spectra_muse) + np.isinf(spectra_muse_err))
-    # print(sum(np.invert(np.isnan(spectra_muse) + np.isnan(spectra_muse_err) + np.isinf(spectra_muse) + np.isinf(spectra_muse_err))))
-    # print(sum(((spectra_muse > 0) & (spectra_muse < 100000000000000))))
 
     # get stellar library
     ppxf_dir = path.dirname(path.realpath(lib.__file__))
@@ -451,14 +547,14 @@ def fit_ppxf2spec(spec_dict, redshift, sps_name='fsps', age_range=None, metal_ra
         request.urlretrieve(url, filename)
 
     sps = lib.sps_lib(filename=filename, velscale=velscale, fwhm_gal=lsf_dict, norm_range=[5070, 5950],
-                      wave_range=None,
-                      age_range=age_range, metal_range=metal_range)
+                      wave_range=None, age_range=age_range, metal_range=metal_range)
     reg_dim = sps.templates.shape[1:]  # shape of (n_ages, n_metal)
     stars_templates = sps.templates.reshape(sps.templates.shape[0], -1)
 
     gas_templates, gas_names, line_wave = util.emission_lines(ln_lam_temp=sps.ln_lam_temp,
                                                               lam_range_gal=spec_dict['lam_range'],
-                                                              FWHM_gal=get_MUSE_polyFWHM)
+                                                              FWHM_gal=get_MUSE_polyFWHM,
+                                                              limit_doublets=False)
 
     templates = np.column_stack([stars_templates, gas_templates])
 
@@ -471,29 +567,29 @@ def fit_ppxf2spec(spec_dict, redshift, sps_name='fsps', age_range=None, metal_ra
             component += [1]
 
     gas_component = np.array(component) > 0  # gas_component=True for gas templates
-
     moments = [4, 4, 4]
-
     vel = speed_of_light_kmps * np.log(1 + redshift)   # eq.(8) of Cappellari (2017)
     start_gas = [vel, 150., 0, 0]     # starting guess
     start_star = [vel, 150., 0, 0]
     start = [start_star, start_gas, start_gas]
 
+    # mask bad values
+    mask = np.invert(np.isnan(spectra_muse_err))
+    spectra_muse_err[np.isnan(spectra_muse_err)] = np.nanmean(spectra_muse_err)
+    spectra_muse[np.isnan(spectra_muse)] = 0
+
+
     pp = ppxf(templates=templates, galaxy=spectra_muse, noise=spectra_muse_err, velscale=velscale, start=start,
-              moments=moments, degree=-1, mdegree=4, lam=lam_gal, lam_temp=sps.lam_temp, #regul=1/rms,
-              reg_dim=reg_dim, component=component, gas_component=gas_component, #reddening=0,
-              gas_names=gas_names, goodpixels=goodpixels)
+              moments=moments, degree=-1, mdegree=4, lam=lam_gal, lam_temp=sps.lam_temp,
+              reg_dim=reg_dim, component=component, gas_component=gas_component,
+              reddening=2.5, gas_reddening=0.0, gas_names=gas_names, mask=mask)
 
     light_weights = pp.weights[~gas_component]      # Exclude weights of the gas templates
     light_weights = light_weights.reshape(reg_dim)  # Reshape to (n_ages, n_metal)
     light_weights /= light_weights.sum()            # Normalize to light fractions
 
-    # light_weights = pp.weights[~gas_component]      # Exclude weights of the gas templates
-    # light_weights = light_weights.reshape(reg_dim)
-
     ages, met = sps.mean_age_metal(light_weights)
     mass2light = sps.mass_to_light(light_weights, redshift=redshift)
-
 
     wavelength = pp.lam
     total_flux = pp.galaxy
@@ -503,17 +599,74 @@ def fit_ppxf2spec(spec_dict, redshift, sps_name='fsps', age_range=None, metal_ra
     gas_best_fit = pp.gas_bestfit
     continuum_best_fit = best_fit - gas_best_fit
 
+    # get velocity of balmer component
+    sol_kin_comp = pp.sol[0]
+    balmer_kin_comp = pp.sol[1]
+    forbidden_kin_comp = pp.sol[2]
+
+    h_beta_rest_air = 4861.333
+    h_alpha_rest_air = 6562.819
+
+    balmer_redshift = np.exp(balmer_kin_comp[0] / speed_of_light_kmps) - 1
+
+    observed_h_beta = h_beta_rest_air * (1 + balmer_redshift)
+    observed_h_alpha = h_alpha_rest_air * (1 + balmer_redshift)
+
+    observed_sigma_h_alpha = (balmer_kin_comp[1] / speed_of_light_kmps) * h_alpha_rest_air
+    observed_sigma_h_alpha = np.sqrt(observed_sigma_h_alpha ** 2 + get_MUSE_polyFWHM(observed_h_alpha))
+    observed_sigma_h_beta = (balmer_kin_comp[1] / speed_of_light_kmps) * h_beta_rest_air
+    observed_sigma_h_beta = np.sqrt(observed_sigma_h_beta ** 2 + get_MUSE_polyFWHM(observed_h_beta))
+
+    mask_ha = (wavelength > (observed_h_alpha - 3*observed_sigma_h_alpha)) & (wavelength < (observed_h_alpha + 3*observed_sigma_h_alpha))
+    mask_hb = (wavelength > (observed_h_beta - 3*observed_sigma_h_beta)) & (wavelength < (observed_h_beta + 3*observed_sigma_h_beta))
+
+    ha_line_comp = (total_flux - continuum_best_fit)[mask_ha]
+    ha_cont_comp = continuum_best_fit[mask_ha]
+    ha_wave_comp = wavelength[mask_ha]
+    delta_lambda_ha = np.mean((ha_wave_comp[1:] - ha_wave_comp[:-1]) / 2)
+    ha_ew = np.sum(((ha_cont_comp - ha_line_comp) / ha_cont_comp) * delta_lambda_ha)
+
+    hb_line_comp = (total_flux - continuum_best_fit)[mask_hb]
+    hb_cont_comp = continuum_best_fit[mask_hb]
+    hb_wave_comp = wavelength[mask_hb]
+    delta_lambda_hb = np.mean((hb_wave_comp[1:] - hb_wave_comp[:-1]) / 2)
+    hb_ew = np.sum(((hb_cont_comp - hb_line_comp) / hb_cont_comp) * delta_lambda_hb)
+
+    # gas_phase_metallicity
+    flux_ha = pp.gas_flux[pp.gas_names == 'Halpha']
+    flux_hb = pp.gas_flux[pp.gas_names == 'Hbeta']
+    flux_nii = pp.gas_flux[pp.gas_names == '[OIII]5007_d']
+    flux_oiii = pp.gas_flux[pp.gas_names == '[NII]6583_d']
+
+    o3n2 = np.log10((flux_oiii / flux_hb) / (flux_nii / flux_ha))
+    gas_phase_met = 8.73 - 0.32 * o3n2[0]
+    # plt.plot(hb_wave_comp, hb_line_comp)
+    # plt.plot(hb_wave_comp, hb_cont_comp)
+    # plt.show()
+    # exit()
+    #
+    # # exit()
+    # plt.errorbar(wavelength, total_flux, yerr=total_flux_err)
+    # plt.plot(wavelength, continuum_best_fit)
+    # plt.scatter(wavelength[left_idx_ha[0][0]], continuum_best_fit[left_idx_ha[0][0]])
+    # plt.scatter(wavelength[right_idx_ha[0][0]], continuum_best_fit[right_idx_ha[0][0]])
+    # plt.plot(wavelength, continuum_best_fit + gas_best_fit)
+    # plt.plot(wavelength, gas_best_fit)
+    # plt.plot([observed_nii_1, observed_nii_1], [np.min(total_flux), np.max(total_flux)])
+    # plt.plot([observed_h_alpha, observed_h_alpha], [np.min(total_flux), np.max(total_flux)])
+    # plt.plot([observed_nii_2, observed_nii_2], [np.min(total_flux), np.max(total_flux)])
+    # plt.show()
+    #
+
     return {
         'wavelength': wavelength, 'total_flux': total_flux, 'total_flux_err': total_flux_err,
         'best_fit': best_fit, 'gas_best_fit': gas_best_fit, 'continuum_best_fit': continuum_best_fit,
-        'pp': pp, 'ages': ages, 'met': met, 'mass2light': mass2light}
+        'ages': ages, 'met': met, 'mass2light': mass2light,
+        'star_red': pp.dust[0]['sol'][0], 'gas_red': pp.dust[1]['sol'][0],
+        'sol_kin_comp': sol_kin_comp, 'balmer_kin_comp': balmer_kin_comp, 'forbidden_kin_comp': forbidden_kin_comp,
+        'ha_ew': ha_ew, 'hb_ew': hb_ew, 'gas_phase_met': gas_phase_met
+    }
 
-    # plt.errorbar(wavelength, total_flux, yerr=total_flux_err)
-    # plt.plot(wavelength, continuum_best_fit)
-    # plt.plot(wavelength, continuum_best_fit + gas_best_fit)
-    # plt.plot(wavelength, gas_best_fit)
-    # plt.show()
-    #
     #
     #
     #
@@ -522,10 +675,7 @@ def fit_ppxf2spec(spec_dict, redshift, sps_name='fsps', age_range=None, metal_ra
     # pp.plot()
     # plt.show()
     #
-    # plt.figure(figsize=(9, 3))
-    # sps.plot(light_weights)
-    # plt.title("Light Weights Fractions");
-    # plt.show()
+
     #
     # exit()
 
@@ -820,8 +970,11 @@ def compute_cbar_norm(vmin_vmax=None, cutout_list=None, log_scale=False):
         vmax = None
         for cutout in cutout_list:
             sigma_clip = SigmaClip(sigma=3)
-            min = np.nanmin(sigma_clip(cutout))
-            max = np.nanmax(sigma_clip(cutout))
+            mask_zeros = np.invert(cutout == 0)
+            if len(sigma_clip(cutout[mask_zeros])) == 0:
+                return None
+            min = np.nanmin(sigma_clip(cutout[mask_zeros]))
+            max = np.nanmax(sigma_clip(cutout[mask_zeros]))
             if vmin is None:
                vmin = min
             if vmax is None:
@@ -880,3 +1033,158 @@ def create_cbar(ax_cbar, cmap, norm, cbar_label, fontsize, ticks=None, labelpad=
                             labelsize=fontsize)
         ax_cbar.set_title(cbar_label, fontsize=fontsize)
 
+
+def lin_func(p, x):
+    gradient, intersect = p
+    return gradient*x + intersect
+
+
+def fit_line(x_data, y_data, x_data_err, y_data_err):
+
+    # Create a model for fitting.
+    lin_model = odr.Model(lin_func)
+
+    # Create a RealData object using our initiated data from above.
+    data = odr.RealData(x_data, y_data, sx=x_data_err, sy=y_data_err)
+
+    # Set up ODR with the model and data.
+    odr_object = odr.ODR(data, lin_model, beta0=[0., 1.])
+
+    # Run the regression.
+    out = odr_object.run()
+
+    # Use the in-built pprint method to give us results.
+    # out.pprint()
+
+    gradient, intersect = out.beta
+    gradient_err, intersect_err = out.sd_beta
+
+    # calculate sigma around fit
+    sigma = np.std(y_data - lin_func(p=(gradient, intersect), x=x_data))
+
+    return {
+        'gradient': gradient,
+        'intersect': intersect,
+        'gradient_err': gradient_err,
+        'intersect_err': intersect_err,
+        'sigma': sigma
+    }
+
+
+def conv_mjy2ab_mag(flux):
+
+    """conversion of mJy to AB mag.
+    See definition on Wikipedia : https://en.wikipedia.org/wiki/AB_magnitude """
+
+    return -2.5 * np.log10(flux * 1e-3) + 8.90
+
+
+def conv_ab_mag2mjy(mag):
+
+    """conversion of AB mag to mJy.
+    See definition on Wikipedia : https://en.wikipedia.org/wiki/AB_magnitude """
+
+    return 1e3 * 10 ** ((8.5 - mag)/2.5)
+
+
+def conv_mjy2vega(flux, ab_zp, vega_zp):
+
+    """This function (non-sophisticated as of now)
+     assumes the flux are given in units of milli-Janskies"""
+
+    """First, convert mjy to f_nu"""
+    conv_f_nu = flux*np.power(10.0, -26)
+    """Convert f_nu in ergs s^-1 cm^-2 Hz^-1 to AB mag"""
+    ABmag = -2.5*np.log10(conv_f_nu) - 48.60
+    """Convert AB mag to Vega mag"""
+    vega_mag = ABmag + (vega_zp - ab_zp)
+
+    return vega_mag
+
+
+def density_with_points(ax, x, y, binx=None, biny=None, threshold=1, kernel_std=2.0, save=False, save_name='',
+                        cmap='inferno', scatter_size=10, scatter_alpha=0.3, invert_y_axis=False):
+
+    if binx is None:
+        binx = np.linspace(-1.5, 2.5, 190)
+    if biny is None:
+        biny = np.linspace(-2.0, 2.0, 190)
+
+    good = np.invert(((np.isnan(x) | np.isnan(y)) | (np.isinf(x) | np.isinf(y))))
+
+    hist, xedges, yedges = np.histogram2d(x[good], y[good], bins=(binx, biny))
+
+    if save:
+        np.save('data_output/binx.npy', binx)
+        np.save('data_output/biny.npy', biny)
+        np.save('data_output/hist_%s_un_smoothed.npy' % save_name, hist)
+
+    kernel = Gaussian2DKernel(x_stddev=kernel_std)
+    hist = convolve(hist, kernel)
+
+    if save:
+        np.save('data_output/hist_%s_smoothed.npy' % save_name, hist)
+
+    over_dense_regions = hist > threshold
+    mask_high_dens = np.zeros(len(x), dtype=bool)
+
+    for x_index in range(len(xedges)-1):
+        for y_index in range(len(yedges)-1):
+            if over_dense_regions[x_index, y_index]:
+                mask = (x > xedges[x_index]) & (x < xedges[x_index + 1]) & (y > yedges[y_index]) & (y < yedges[y_index + 1])
+                mask_high_dens += mask
+    print(sum(mask_high_dens) / len(mask_high_dens))
+    hist[hist <= threshold] = np.nan
+
+    cmap = cm.get_cmap(cmap)
+
+    scatter_color = cmap(0)
+
+    ax.imshow(hist.T, origin='lower', extent=(binx.min(), binx.max(), biny.min(), biny.max()), cmap=cmap,
+              interpolation='nearest', aspect='auto')
+    ax.scatter(x[~mask_high_dens], y[~mask_high_dens], color=scatter_color, marker='.', s=scatter_size, alpha=scatter_alpha)
+    if invert_y_axis:
+        ax.set_ylim(ax.get_ylim()[::-1])
+
+
+
+
+
+def plot_reddening_vect(ax, x_color_1='v', x_color_2='i',  y_color_1='u', y_color_2='b',
+                        x_color_int=0, y_color_int=0, av_val=1,
+                        linewidth=2, line_color='k',
+                        text=False, fontsize=20, text_color='k', x_text_offset=0.1, y_text_offset=-0.3):
+
+    catalog_access = photometry_tools.data_access.CatalogAccess()
+
+    nuv_wave = catalog_access.hst_wfc3_uvis1_bands_mean_wave['F275W']*1e-4
+    u_wave = catalog_access.hst_wfc3_uvis1_bands_mean_wave['F336W']*1e-4
+    b_wave = catalog_access.hst_wfc3_uvis1_bands_mean_wave['F438W']*1e-4
+    v_wave = catalog_access.hst_wfc3_uvis1_bands_mean_wave['F555W']*1e-4
+    i_wave = catalog_access.hst_wfc3_uvis1_bands_mean_wave['F814W']*1e-4
+
+    x_wave_1 = locals()[x_color_1 + '_wave']
+    x_wave_2 = locals()[x_color_2 + '_wave']
+    y_wave_1 = locals()[y_color_1 + '_wave']
+    y_wave_2 = locals()[y_color_2 + '_wave']
+
+    color_ext_x = dust_tools.extinction_tools.ExtinctionTools.color_ext_ccm89_av(wave1=x_wave_1, wave2=x_wave_2, av=av_val)
+    color_ext_y = dust_tools.extinction_tools.ExtinctionTools.color_ext_ccm89_av(wave1=y_wave_1, wave2=y_wave_2, av=av_val)
+
+    slope_av_vector = ((y_color_int + color_ext_y) - y_color_int) / ((x_color_int + color_ext_x) - x_color_int)
+
+    angle_av_vector = np.arctan(color_ext_y/color_ext_x) * 180/np.pi
+
+    ax.annotate('', xy=(x_color_int + color_ext_x, y_color_int + color_ext_y), xycoords='data',
+                xytext=(x_color_int, y_color_int), fontsize=fontsize,
+                textcoords='data', arrowprops=dict(arrowstyle='-|>', color=line_color, lw=linewidth, ls='-'))
+
+    if text:
+        if isinstance(av_val, int):
+            arrow_text = r'A$_{\rm V}$=%i mag' % av_val
+        else:
+            arrow_text = r'A$_{\rm V}$=%.1f mag' % av_val
+        ax.text(x_color_int + x_text_offset, y_color_int + y_text_offset, arrow_text,
+                horizontalalignment='left', verticalalignment='bottom',
+                transform_rotates_text=True, rotation_mode='anchor',
+                rotation=angle_av_vector, fontsize=fontsize, color=text_color)

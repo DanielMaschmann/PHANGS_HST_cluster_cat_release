@@ -21,7 +21,9 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
     def __init__(self, target_name=None,
                  hst_target_name=None, hst_ha_target_name=None, nircam_target_name=None, miri_target_name=None,
                  hst_data_path=None, hst_ha_data_path=None, nircam_data_path=None, miri_data_path=None,
-                 hst_data_ver='v1.0', hst_ha_data_ver='v1p0', nircam_data_ver='v0p4p2', miri_data_ver='v0p5'):
+                 astrosat_data_path=None,
+                 hst_data_ver='v1.0', hst_ha_data_ver='v1p0', nircam_data_ver='v0p4p2', miri_data_ver='v0p5',
+                 astrosat_data_ver='v1p0'):
         """
         In order to access photometry data one need to specify data path, versions and most important target names.
         For example NGC 628 has in HST a specification "c" for center or "e" for east.
@@ -48,6 +50,8 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             Default None. Path to NIRCAM imaging data
         miri_data_path : str
             Default None. Path to MIRI imaging data
+        astrosat_data_path : str
+            Default None. Path to AstroSat imaging data
         hst_data_ver : str
             Default v1.0 denotes the internal data release version of the HST imaging data.
         hst_ha_data_ver : str
@@ -115,18 +119,24 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             self.miri_data_path = None
         else:
             self.miri_data_path = Path(miri_data_path)
+        if astrosat_data_path is None:
+            self.astrosat_data_path = None
+        else:
+            self.astrosat_data_path = Path(astrosat_data_path)
 
         # specify the data access version
         self.hst_data_ver = hst_data_ver
         self.hst_ha_data_ver = hst_ha_data_ver
         self.nircam_data_ver = nircam_data_ver
         self.miri_data_ver = miri_data_ver
+        self.astrosat_data_ver = astrosat_data_ver
 
         # loaded data dictionaries
         self.hst_bands_data = {}
         self.hst_ha_bands_data = {}
         self.nircam_bands_data = {}
         self.miri_bands_data = {}
+        self.astrosat_bands_data = {}
 
     def get_hst_img_file_name(self, band, hst_data_folder=None, file_name=None):
         """
@@ -245,16 +255,21 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         if hst_ha_data_folder is None:
             hst_ha_data_folder = (self.hst_ha_data_path / self.hst_ha_ver_folder_names[self.hst_ha_data_ver])
 
-        # getting the band specification
+        if self.hst_ha_target_name[3] == '0':
+            target_str = self.hst_ha_target_name[:3] + self.hst_ha_target_name[4:]
+        else:
+            target_str = self.hst_ha_target_name
+
         if band in ['F657N', 'F658N']:
             band_string = '_hst_%s_an.fits' % band.lower()
         else:
             band_string = '_hst_%s.fits' % band.lower()
 
-        if self.hst_ha_target_name[3] == '0':
-            target_str = self.hst_ha_target_name[:3] + self.hst_ha_target_name[4:]
-        else:
-            target_str = self.hst_ha_target_name
+        # if band in ['F657N', 'F658N']:
+        #     hst_ha_data_folder = (self.hst_ha_data_path / 'phangs_hst_ha_obs')
+        #     band_string = '%s_uvis_%s_exp_drc_sci.fits' % (target_str, band.lower())
+        # else:
+        #     band_string = '_hst_%s.fits' % band.lower()
 
         ending_of_band_file = target_str.lower() + band_string
 
@@ -345,6 +360,35 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         else:
             return Path(miri_data_folder) / Path(file_name)
 
+    def get_astrosat_img_file_name(self, band, astrosat_data_folder=None, file_name=None):
+        """
+
+        Parameters
+        ----------
+        band : str
+        astrosat_data_folder : str
+        file_name : str
+
+
+        Returns
+        -------
+        data_file_path : Path
+        """
+        if band not in (self.astrosat_nuv_bands + self.astrosat_fuv_bands):
+            raise AttributeError('The band <%s> is not in the list of possible AstroSat bands.' % band)
+
+        if astrosat_data_folder is None:
+            astrosat_data_folder = (self.astrosat_data_path / self.astrosat_ver_folder_names[self.astrosat_data_ver] /
+                                    'release')
+
+        ending_of_band_file = '%s_%s_bkg_subtracted_mw_corrected.fits' % (self.target_name.upper(), band[:-1].upper())
+
+        if file_name is None:
+            return helper_func.identify_file_in_folder(folder_path=astrosat_data_folder,
+                                                       str_in_file_name_1=ending_of_band_file)
+        else:
+            return Path(astrosat_data_folder) / Path(file_name)
+
     def load_hst_band(self, band, load_err=True, flux_unit='Jy', hst_data_folder=None, img_file_name=None,
                       err_file_name=None):
         """
@@ -385,7 +429,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             # rescale to Jy
             conversion_factor = conversion_factor
         elif flux_unit == 'mJy':
-            # rescale to Jy
+            # rescale to mJy
             conversion_factor *= 1e3
         elif flux_unit == 'MJy/sr':
             # get the size of one pixel in sr with the factor 1e6 for the conversion of Jy to MJy later
@@ -563,6 +607,46 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                                          '%s_wcs_err' % band: img_wcs, '%s_unit_err' % band: flux_unit,
                                          '%s_pixel_area_size_sr_err' % band: pixel_area_size_sr})
 
+    def load_astrosat_band(self, band, load_err=True, flux_unit='erg A-1 cm-2 s-1', astrosat_data_folder=None,
+                           img_file_name=None):
+        """
+
+        Parameters
+        ----------
+        band : str
+        load_err : bool
+        flux_unit : str
+        astrosat_data_folder : str
+        img_file_name : str
+        """
+        # load the band observations
+        file_name = self.get_astrosat_img_file_name(band=band, astrosat_data_folder=astrosat_data_folder,
+                                                    file_name=img_file_name)
+        hdu_number = 0
+        img_data, img_header, img_wcs = helper_func.load_img(file_name=file_name, hdu_number=hdu_number)
+        pixel_area_size_sr = img_wcs.proj_plane_pixel_area().value * self.sr_per_square_deg
+
+        # rescale data image
+        if flux_unit == 'erg A-1 cm-2 s-1':
+            conversion_factor = 1
+        elif flux_unit == 'Jy':
+            band_wavelength_angstrom = self.get_band_wave(band=band, unit='angstrom')
+            conversion_factor = 1e23 * 1e-2 * 1e-8 * (band_wavelength_angstrom ** 2) / speed_of_light
+        elif flux_unit == 'mJy':
+            band_wavelength_angstrom = self.get_band_wave(band=band, unit='angstrom')
+            conversion_factor = 1e3 * 1e23 * 1e-2 * 1e-8 * (band_wavelength_angstrom ** 2) / speed_of_light
+        elif flux_unit == 'MJy/sr':
+            band_wavelength_angstrom = self.get_band_wave(band=band, unit='angstrom')
+            conversion_factor = (1e-6 * 1e23 * 1e-2 * 1e-8 * (band_wavelength_angstrom ** 2) /
+                                 (speed_of_light * pixel_area_size_sr))
+        else:
+            raise KeyError('flux_unit ', flux_unit, ' not understand')
+
+        img_data *= conversion_factor
+        self.astrosat_bands_data.update({'%s_data_img' % band: img_data, '%s_header_img' % band: img_header,
+                                         '%s_wcs_img' % band: img_wcs, '%s_unit_img' % band: flux_unit,
+                                         '%s_pixel_area_size_sr_img' % band: pixel_area_size_sr})
+
     def get_hst_band_list(self):
         """
         gets list of bands of HST
@@ -622,7 +706,23 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             band_list = self.sort_band_list(band_list=band_list)
         return band_list
 
-    def get_phangs_band_list(self, include_hst=True, include_hst_ha=True, include_nircam=True, include_miri=True):
+    def get_astrosat_band_list(self):
+        """
+        gets list of bands of AstroSat observations
+        Returns
+        -------
+        band_list : list
+        """
+        band_list = []
+        if self.target_name in self.phangs_astrosat_obs_target_list:
+            for band in (self.astrosat_nuv_bands + self.astrosat_fuv_bands):
+                if band in self.astrosat_targets[self.nircam_target_name]['observed_bands']:
+                    band_list.append(band)
+            band_list = self.sort_band_list(band_list=band_list)
+        return band_list
+
+    def get_phangs_band_list(self, include_hst=True, include_hst_ha=True, include_nircam=True, include_miri=True,
+                             include_astrosat=True):
         """
         wrapper to load all bands observed with HST, NIRCAM and MIRI for one target
         Parameters
@@ -631,6 +731,7 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
         include_hst_ha : bool
         include_nircam : bool
         include_miri : bool
+        include_astrosat : bool
 
         Returns
         -------
@@ -645,6 +746,8 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             band_list += self.get_nircam_band_list()
         if include_miri:
             band_list += self.get_miri_band_list()
+        if include_astrosat:
+            band_list += self.get_astrosat_band_list()
 
         return self.sort_band_list(band_list=band_list)
 
@@ -689,9 +792,9 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             if (('%s_data_img' % band in self.hst_bands_data) |
                     ('%s_data_img' % band in self.hst_ha_bands_data) |
                     ('%s_data_img' % band in self.nircam_bands_data) |
-                    ('%s_data_img' % band in self.miri_bands_data)):
+                    ('%s_data_img' % band in self.miri_bands_data) |
+                    ('%s_data_img' % band in self.astrosat_bands_data)):
                 continue
-
             if band in ['ha', 'ha_s', 'ha_si', 'ha_sic', 'F657N', 'F658N']:
                 self.load_hst_ha_band(band=band, flux_unit=flux_unit, hst_ha_data_folder=folder_name,
                                       img_file_name=img_file_name, err_file_name=err_file_name, load_err=load_err)
@@ -704,6 +807,9 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
             elif band in self.miri_bands:
                 self.load_miri_band(band=band, flux_unit=flux_unit, miri_data_folder=folder_name,
                                     img_file_name=img_file_name, load_err=load_err)
+            elif band in (self.astrosat_nuv_bands + self.astrosat_fuv_bands):
+                self.load_astrosat_band(band=band, flux_unit=flux_unit, astrosat_data_folder=folder_name,
+                                        img_file_name=img_file_name, load_err=load_err)
             else:
                 raise KeyError('Band is not found in possible band lists')
 
@@ -723,116 +829,73 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
 
     def change_band_unit(self, band, new_unit='MJy/sr'):
         """
-        will change loaded data to the needed unit
+        will change loaded data to the needed unit. This will directly change all data saved in the constructor
         Parameters
         ----------
         band : str
         new_unit : str
+            this can be :
+            'mJy', 'Jy', 'MJy/sr' or 'erg A-1 cm-2 s-1'
         """
+
+        # first we need to make sure what was the old unit and for which instrument.
+        # Furthermore, we need the wavelength for some transformations
         if band in self.get_hst_band_list():
+            instrument = 'hst'
+        elif band in self.get_hst_ha_band_list():
+            instrument = 'hst_ha'
+        elif band in self.get_nircam_band_list():
+            instrument = 'nircam'
+        elif band in self.miri_bands:
+            instrument = 'miri'
+        elif band in self.get_astrosat_band_list():
+            instrument = 'astrosat'
+        else:
+            raise KeyError('the band <%s> is not under the observed bands!' % band)
 
-            old_unit = self.hst_bands_data['%s_unit_img' % band]
-            conversion_factor = 1
-            # change to Jy
-            if 'm' in old_unit:
+        # now we create a conversion factor
+        # get the old unit
+        old_unit = getattr(self, '%s_bands_data' % instrument)['%s_unit_img' % band]
+        # get also pixel sizes
+        pixel_size = getattr(self, '%s_bands_data' % instrument)['%s_pixel_area_size_sr_img' % band]
+        # check if units are in the list of possible transformations
+        assert old_unit in ['mJy', 'Jy', 'MJy/sr', 'erg A-1 cm-2 s-1']
+        assert new_unit in ['mJy', 'Jy', 'MJy/sr', 'erg A-1 cm-2 s-1']
+
+        # get wavelength
+        band_wave = self.get_band_wave(band=band, unit='angstrom')
+        conversion_factor = 1
+        if old_unit != new_unit:
+            # now first change the conversion factor to Jy
+            if old_unit == 'mJy':
                 conversion_factor *= 1e-3
-            if 'M' in old_unit:
-                conversion_factor *= 1e6
-            if '/sr' in old_unit:
-                conversion_factor *= self.hst_bands_data['%s_pixel_area_size_sr_img' % band]
+            elif old_unit == 'MJy/sr':
+                conversion_factor *= (1e6 * pixel_size)
+            elif old_unit == 'erg A-1 cm-2 s-1':
+                # The conversion from erg A-1 cm-2 s-1 is well described in
+                # https://www.physicsforums.com/threads/unit-conversion-flux-densities.742561/
+                # se also
+                # https://www.physicsforums.com/threads/unit-conversion-of-flux-jansky-to-erg-s-cm-a-simplified-guide.927166/
+                # we use fv dv = fλ dλ
+                # fλ = fv dv/dλ
+                # and because v = c/λ...
+                # fλ = fv*c / λ^2
+                # thus the conversion factor is:
+                conversion_factor = 1e23 * 1e-8 * (band_wave ** 2) / (speed_of_light * 1e2)
+                # the speed of light is in m/s the factor 1-e2 changes it to cm/s
+                # the factor 1e8 changes Angstrom to cm (the Angstrom was in the nominator therefore it is 1/1e-8)
 
-            # change to the new unit
-            if 'm' in new_unit:
+            # now convert to new unit
+            if new_unit == 'mJy':
                 conversion_factor *= 1e3
-            if 'M' in new_unit:
-                conversion_factor *= 1e-6
-            if '/sr' in new_unit:
-                conversion_factor /= self.hst_bands_data['%s_pixel_area_size_sr_img' % band]
+            elif new_unit == 'MJy/sr':
+                conversion_factor *= 1e-6 / pixel_size
+            elif new_unit == 'erg A-1 cm-2 s-1':
+                conversion_factor *= 1e-23 * 1e8 * (speed_of_light * 1e2) / (band_wave ** 2)
 
-            self.hst_bands_data['%s_data_img' % band] *= conversion_factor
-            self.hst_bands_data['%s_unit_img' % band] = new_unit
-            if '%s_data_err' % band in self.hst_bands_data.keys():
-                self.hst_bands_data['%s_data_err' % band] *= conversion_factor
-                self.hst_bands_data['%s_unit_err' % band] = new_unit
-
-        if band in self.get_hst_ha_band_list():
-
-            old_unit = self.hst_ha_bands_data['%s_unit_img' % band]
-            conversion_factor = 1
-            # change to Jy
-            if 'm' in old_unit:
-                conversion_factor *= 1e-3
-            if 'M' in old_unit:
-                conversion_factor *= 1e6
-            if '/sr' in old_unit:
-                conversion_factor *= self.hst_ha_bands_data['%s_pixel_area_size_sr_img' % band]
-
-            # change to the new unit
-            if 'm' in new_unit:
-                conversion_factor *= 1e3
-            if 'M' in new_unit:
-                conversion_factor *= 1e-6
-            if '/sr' in new_unit:
-                conversion_factor /= self.hst_ha_bands_data['%s_pixel_area_size_sr_img' % band]
-
-            self.hst_ha_bands_data['%s_data_img' % band] *= conversion_factor
-            self.hst_ha_bands_data['%s_unit_img' % band] = new_unit
-            if '%s_data_err' % band in self.hst_ha_bands_data.keys():
-                self.hst_ha_bands_data['%s_data_err' % band] *= conversion_factor
-                self.hst_ha_bands_data['%s_unit_err' % band] = new_unit
-
-        if band in self.get_nircam_band_list():
-            old_unit = self.nircam_bands_data['%s_unit_img' % band]
-
-            conversion_factor = 1
-            # change to Jy
-            if 'm' in old_unit:
-                conversion_factor *= 1e-3
-            if 'M' in old_unit:
-                conversion_factor *= 1e6
-            if '/sr' in old_unit:
-                conversion_factor *= self.nircam_bands_data['%s_pixel_area_size_sr_img' % band]
-
-            # change to the new unit
-            if 'm' in new_unit:
-                conversion_factor *= 1e3
-            if 'M' in new_unit:
-                conversion_factor *= 1e-6
-            if '/sr' in new_unit:
-                conversion_factor /= self.nircam_bands_data['%s_pixel_area_size_sr_img' % band]
-
-            self.nircam_bands_data['%s_data_img' % band] *= conversion_factor
-            self.nircam_bands_data['%s_unit_img' % band] = new_unit
-
-            if '%s_data_err' % band in self.nircam_bands_data.keys():
-                self.nircam_bands_data['%s_data_err' % band] *= conversion_factor
-                self.nircam_bands_data['%s_unit_err' % band] = new_unit
-
-        if band in self.miri_bands:
-            old_unit = self.miri_bands_data['%s_unit_img' % band]
-
-            conversion_factor = 1
-            # change to Jy
-            if 'm' in old_unit:
-                conversion_factor *= 1e-3
-            if 'M' in old_unit:
-                conversion_factor *= 1e6
-            if '/sr' in old_unit:
-                conversion_factor *= self.miri_bands_data['%s_pixel_area_size_sr_img' % band]
-
-            # change to the new unit
-            if 'm' in new_unit:
-                conversion_factor *= 1e3
-            if 'M' in new_unit:
-                conversion_factor *= 1e-6
-            if '/sr' in new_unit:
-                conversion_factor /= self.miri_bands_data['%s_pixel_area_size_sr_img' % band]
-
-            self.miri_bands_data['%s_data_img' % band] *= conversion_factor
-            self.miri_bands_data['%s_unit_img' % band] = new_unit
-            if '%s_data_err' % band in self.miri_bands_data.keys():
-                self.miri_bands_data['%s_data_err' % band] *= conversion_factor
-                self.miri_bands_data['%s_unit_err' % band] = new_unit
+        # change data
+        getattr(self, '%s_bands_data' % instrument)['%s_data_img' % band] *= conversion_factor
+        getattr(self, '%s_bands_data' % instrument)['%s_unit_img' % band] = new_unit
 
     def get_band_cutout_dict(self, ra_cutout, dec_cutout, cutout_size, include_err=False, band_list=None):
         """
@@ -913,37 +976,46 @@ class PhotAccess(phangs_info.PhangsObsInfo, phangs_info.PhysParams):
                             helper_func.get_img_cutout(img=self.miri_bands_data['%s_data_err' % band],
                                                        wcs=self.miri_bands_data['%s_wcs_err' % band],
                                                        coord=cutout_pos, cutout_size=cutout_size[band_index])})
-
+            elif band in self.get_astrosat_band_list():
+                cutout_dict.update({
+                    '%s_img_cutout' % band:
+                        helper_func.get_img_cutout(img=self.astrosat_bands_data['%s_data_img' % band],
+                                                   wcs=self.astrosat_bands_data['%s_wcs_img' % band],
+                                                   coord=cutout_pos, cutout_size=cutout_size[band_index])})
         return cutout_dict
 
-    def get_band_wave(self, band, unit='mu'):
+    def get_band_wave(self, band, wave_estimator='mean_wave', unit='mu'):
         """
         Returns mean wavelength of a specific band
         Parameters
         ----------
         unit : str
+        wave_estimator: str
+            can be mean_wave, min_wave or max_wave
         band : str
 
         Returns
         -------
         wavelength : float
         """
-        if band in self.phangs_hst_obs_band_dict[self.hst_target_name]['acs_wfc1_observed_bands']:
-            wave = self.hst_acs_wfc1_bands_mean_wave[band]
-        elif band in self.phangs_hst_obs_band_dict[self.hst_target_name]['wfc3_uvis_observed_bands']:
-            wave = self.hst_wfc3_uvis1_bands_mean_wave[band]
-        elif band in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
+        if band in self.hst_acs_wfc1_bands_wave.keys():
+            wave = self.hst_acs_wfc1_bands_wave[band][wave_estimator]
+        elif band in self.hst_wfc3_uvis1_bands_wave.keys():
+            wave = self.hst_wfc3_uvis1_bands_wave[band][wave_estimator]
+        elif band in ['F657N', 'F658N', 'ha', 'ha_s', 'ha_si', 'ha_sic']:
             if 'F657N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
-                wave = self.hst_wfc3_uvis1_bands_mean_wave['F657N']
+                wave = self.hst_wfc3_uvis1_bands_wave['F657N'][wave_estimator]
             elif 'F658N' in self.phangs_hst_ha_obs_band_dict[self.hst_ha_target_name]['ha_observed']:
-                wave = self.hst_wfc3_uvis1_bands_mean_wave['F658N']
+                wave = self.hst_wfc3_uvis1_bands_wave['F658N'][wave_estimator]
             else:
                 raise ValueError('The band <%s> is listed as an observed H-alpha filter but not F657N or F658N were '
                                  'specified ' % band)
-        elif band in self.nircam_targets[self.nircam_target_name]['observed_bands']:
-            wave = self.nircam_bands_mean_wave[band]
-        elif band in self.miri_targets[self.miri_target_name]['observed_bands']:
-            wave = self.miri_bands_mean_wave[band]
+        elif band in self.nircam_bands_wave.keys():
+            wave = self.nircam_bands_wave[band][wave_estimator]
+        elif band in self.miri_bands_wave.keys():
+            wave = self.miri_bands_wave[band][wave_estimator]
+        elif band in self.astrosat_bands_wave.keys():
+            wave = self.astrosat_bands_wave[band][wave_estimator]
         else:
             raise KeyError(band, 'not understand')
 
