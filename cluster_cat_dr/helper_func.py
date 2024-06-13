@@ -397,6 +397,42 @@ def plot_coord_circle(ax, pos, rad, color, line_style='-', line_width=3, alpha=1
         ax.add_patch(circle)
 
 
+def plot_coord_croshair(ax, pos, wcs, rad, hair_length, color, line_style='-', line_width=3, alpha=1.):
+    """
+    function to draw croshair around a coordinate on an axis with a WCS projection
+
+    Parameters
+    ----------
+    ax : ``astropy.visualization.wcsaxes.core.WCSAxes``
+    pos : ``astropy.coordinates.SkyCoord``
+    rad : float
+        circle_radius in arcsec
+    color : str
+    line_style: str
+    line_width: float
+    alpha: float
+
+    Returns
+    -------
+    None
+    """
+
+    pos_pix = wcs.world_to_pixel(pos)
+    horizontal_rad = transform_world2pix_scale(length_in_arcsec=rad, wcs=wcs, dim=0)
+    vertical_rad = transform_world2pix_scale(length_in_arcsec=rad, wcs=wcs, dim=1)
+    horizontal_hair_length = transform_world2pix_scale(length_in_arcsec=hair_length, wcs=wcs, dim=0)
+    vertical_hair_length = transform_world2pix_scale(length_in_arcsec=hair_length, wcs=wcs, dim=1)
+
+    ax.plot([pos_pix[0] + horizontal_rad, pos_pix[0] + horizontal_rad + horizontal_hair_length],
+            [pos_pix[1], pos_pix[1]], color=color, linestyle=line_style, linewidth=line_width, alpha=alpha)
+    ax.plot([pos_pix[0] - horizontal_rad, pos_pix[0] - horizontal_rad - horizontal_hair_length],
+            [pos_pix[1], pos_pix[1]], color=color, linestyle=line_style, linewidth=line_width, alpha=alpha)
+    ax.plot([pos_pix[0], pos_pix[0]], [pos_pix[1] + vertical_rad, pos_pix[1] + vertical_rad + vertical_hair_length],
+        color=color, linestyle=line_style, linewidth=line_width, alpha=alpha)
+    ax.plot([pos_pix[0], pos_pix[0]], [pos_pix[1] - vertical_rad, pos_pix[1] - vertical_rad - vertical_hair_length],
+        color=color, linestyle=line_style, linewidth=line_width, alpha=alpha)
+
+
 def extract_flux_from_circ_aperture(data, wcs, pos, aperture_rad, data_err=None):
     """
 
@@ -990,9 +1026,14 @@ def compute_cbar_norm(vmin_vmax=None, cutout_list=None, log_scale=False):
         #
         # vmin = mean - 5 * std
         # vmax = mean + 20 * std
+
+
     else:
         vmin, vmax = vmin_vmax[0], vmin_vmax[1]
     if log_scale:
+
+        if vmax < 0:
+            vmax = 0.000001
         if vmin < 0:
             vmin = vmax / 100
         norm = LogNorm(vmin, vmax)
@@ -1031,6 +1072,10 @@ def create_cbar(ax_cbar, cmap, norm, cbar_label, fontsize, ticks=None, labelpad=
         # ax_cbar.set_xlabel(cbar_label, labelpad=labelpad, fontsize=fontsize)
         ax_cbar.tick_params(width=tick_width, direction='in', top=True, labeltop=True, bottom=False, labelbottom=False,
                             labelsize=fontsize)
+        # also put the minor ticks to the top
+        ax_cbar.tick_params(which='minor', width=tick_width, direction='in',
+                            top=True, labeltop=True, bottom=False, labelbottom=False,
+                            labelsize=fontsize/1.5)
         ax_cbar.set_title(cbar_label, fontsize=fontsize)
 
 

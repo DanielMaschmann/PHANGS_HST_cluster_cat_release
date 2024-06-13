@@ -57,6 +57,12 @@ class DataReleaseRoutines(CatalogInfo):
         self.nircam_data_ver = nircam_data_ver
         self.miri_data_ver = miri_data_ver
 
+
+        # correction factor for aperture correction bug in ngc 1512 and ngc 1510
+        self.ngc1512_app_corr_offset_mag = 1.724
+        self.ngc1512_app_corr_offset_flux = 10**(-0.4*self.ngc1512_app_corr_offset_mag)
+
+
         # load constructor of parent class
         super().__init__()
 
@@ -467,9 +473,11 @@ class DataReleaseRoutines(CatalogInfo):
                                                             cand_table=candidate_table, classify=classify)
                         obs_table_2 = self.create_obs_table(target='ngc1510', table=table_ir_ngc1510,
                                                             cand_table=candidate_table, classify=classify)
-                        sed_table_1 = self.create_sed_table(table=table_ir_ngc1512,
+                        sed_table_1 = self.create_sed_table(target=target,
+                                                            table=table_ir_ngc1512,
                                                             cand_table=candidate_table)
-                        sed_table_2 = self.create_sed_table(table=table_ir_ngc1510,
+                        sed_table_2 = self.create_sed_table(target=target,
+                                                            table=table_ir_ngc1510,
                                                             cand_table=candidate_table)
                         obs_table_1['INDEX'] = range(1, len(obs_table_1['INDEX'])+1)
                         obs_table_2['INDEX'] = range(1, len(obs_table_2['INDEX'])+1)
@@ -489,7 +497,8 @@ class DataReleaseRoutines(CatalogInfo):
                     else:
                         obs_table_1 = self.create_obs_table(target=target, table=table_ir,
                                                             cand_table=candidate_table, classify=classify)
-                        sed_table_1 = self.create_sed_table(table=table_ir,
+                        sed_table_1 = self.create_sed_table(target=target,
+                                                            table=table_ir,
                                                             cand_table=candidate_table)
                         obs_table_2 = None
                         sed_table_2 = None
@@ -648,6 +657,16 @@ class DataReleaseRoutines(CatalogInfo):
         obs_table = None
         for col_name in column_name_list:
             column_content = table[col_name]
+            # flux correction
+            if target in ['ngc1512', 'ngc1510']:
+                if (self.cat_info[col_name]['col_name'][-3:] == 'mJy') | (self.cat_info[col_name]['col_name'][-7:] == 'mJy_ERR'):
+                    # now check which entrances have a detection
+                    mask_content = column_content != -9999.0
+                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+                if self.cat_info[col_name]['col_name'][-4:] == 'VEGA':
+                    mask_content = column_content != -9999.0
+                    column_content[mask_content] += self.ngc1512_app_corr_offset_mag
+
             if self.cat_info[col_name]['unit'] is not None:
                 column_content *= self.cat_info[col_name]['unit']
             column = Column(data=column_content,
@@ -720,10 +739,12 @@ class DataReleaseRoutines(CatalogInfo):
 
         return obs_table
 
-    def create_sed_table(self, table, cand_table):
+    def create_sed_table(self, target, table, cand_table):
         """
         Function to convert an internal data release table into a final data release table
         ----------
+        target : str
+            target for which the IR catalog should be identified. Must be in self.phangs_hst_target_list
         table : type ``astropy.io.fits.fitsrec.FITS_rec``
             input fits table
         cand_table : type ``astropy.io.fits.fitsrec.FITS_rec``
@@ -739,6 +760,14 @@ class DataReleaseRoutines(CatalogInfo):
         sed_table = None
         for col_name in column_name_list:
             column_content = table[col_name]
+            # mass correction
+            if target in ['ngc1512', 'ngc1510']:
+                if (self.cat_info[col_name]['col_name'] in ['PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR']) | ('mass' in self.cat_info[col_name]['col_name']):
+                    # now check which entrances have a detection
+                    print(self.cat_info[col_name]['col_name'])
+                    mask_content = (column_content != -9999.0) & (column_content != -999.0)
+                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+
             if self.cat_info[col_name]['unit'] is not None:
                 column_content *= self.cat_info[col_name]['unit']
             column = Column(data=column_content,
@@ -796,6 +825,23 @@ class DataReleaseRoutines(CatalogInfo):
         cand_table = None
         for col_name in column_name_list:
             column_content = table[col_name]
+            # flux correction
+            if target in ['ngc1512', 'ngc1510']:
+                if (self.cat_info[col_name]['col_name'][-3:] == 'mJy') | (self.cat_info[col_name]['col_name'][-7:] == 'mJy_ERR'):
+                    # now check which entrances have a detection
+                    mask_content = column_content != -9999.0
+                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+                if self.cat_info[col_name]['col_name'][-4:] == 'VEGA':
+                    mask_content = column_content != -9999.0
+                    column_content[mask_content] += self.ngc1512_app_corr_offset_mag
+
+                # mass correction
+                if (self.cat_info[col_name]['col_name'] in ['PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR']) | ('mass' in self.cat_info[col_name]['col_name']):
+                    # now check which entrances have a detection
+                    print(self.cat_info[col_name]['col_name'])
+                    mask_content = (column_content != -9999.0) & (column_content != -999.0)
+                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+
             if self.cat_info[col_name]['unit'] is not None:
                 column_content *= self.cat_info[col_name]['unit']
             column = Column(data=column_content,
