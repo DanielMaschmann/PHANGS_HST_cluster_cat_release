@@ -23,7 +23,7 @@ from visualization_tool import PhotVisualize
 class DataReleaseRoutines(CatalogInfo):
     def __init__(self, hst_cc_ver, path2ir, catalog_output_path,
                  path2artifact=None, artifact_removal_flag=False, artifact_rais_file_not_found_flag=True,
-                 plot_removed_artifacts_flag=False, data_release=4, catalog_release=2,
+                 plot_removed_artifacts_flag=False, data_release=4, catalog_release=2, cat_ver='v2',
                  existing_artifact_removal_flag=False,
                  path2questionable_artifacts=None,
                  path2diffraction_spike_masks=None,
@@ -41,6 +41,7 @@ class DataReleaseRoutines(CatalogInfo):
         self.plot_removed_artifacts_flag = plot_removed_artifacts_flag
         self.data_release = data_release
         self.catalog_release = catalog_release
+        self.cat_ver = cat_ver
         self.existing_artifact_removal_flag = existing_artifact_removal_flag
         self.path2questionable_artifacts = path2questionable_artifacts
         self.path2diffraction_spike_masks = path2diffraction_spike_masks
@@ -57,10 +58,9 @@ class DataReleaseRoutines(CatalogInfo):
         self.nircam_data_ver = nircam_data_ver
         self.miri_data_ver = miri_data_ver
 
-
         # correction factor for aperture correction bug in ngc 1512 and ngc 1510
-        self.ngc1512_app_corr_offset_mag = 1.724
-        self.ngc1512_app_corr_offset_flux = 10**(-0.4*self.ngc1512_app_corr_offset_mag)
+        # self.ngc1512_app_corr_offset_mag = 1.724
+        # self.ngc1512_app_corr_offset_flux = 10**(-0.4*self.ngc1512_app_corr_offset_mag)
 
 
         # load constructor of parent class
@@ -602,7 +602,7 @@ class DataReleaseRoutines(CatalogInfo):
         cat_str += instruments + '_'
         cat_str += target.lower() + '_'
         cat_str += 'multi' + '_'
-        cat_str += 'v1' + '_'
+        cat_str += self.cat_ver + '_'
         if table_type == 'obs':
             cat_str += 'obs' + '-'
         if table_type == 'sed':
@@ -658,14 +658,14 @@ class DataReleaseRoutines(CatalogInfo):
         for col_name in column_name_list:
             column_content = table[col_name]
             # flux correction
-            if target in ['ngc1512', 'ngc1510']:
-                if (self.cat_info[col_name]['col_name'][-3:] == 'mJy') | (self.cat_info[col_name]['col_name'][-7:] == 'mJy_ERR'):
-                    # now check which entrances have a detection
-                    mask_content = column_content != -9999.0
-                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
-                if self.cat_info[col_name]['col_name'][-4:] == 'VEGA':
-                    mask_content = column_content != -9999.0
-                    column_content[mask_content] += self.ngc1512_app_corr_offset_mag
+            # if target in ['ngc1512', 'ngc1510']:
+            #     if (self.cat_info[col_name]['col_name'][-3:] == 'mJy') | (self.cat_info[col_name]['col_name'][-7:] == 'mJy_ERR'):
+            #         # now check which entrances have a detection
+            #         mask_content = column_content != -9999.0
+            #         column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+            #     if self.cat_info[col_name]['col_name'][-4:] == 'VEGA':
+            #         mask_content = column_content != -9999.0
+            #         column_content[mask_content] += self.ngc1512_app_corr_offset_mag
 
             if self.cat_info[col_name]['unit'] is not None:
                 column_content *= self.cat_info[col_name]['unit']
@@ -761,12 +761,12 @@ class DataReleaseRoutines(CatalogInfo):
         for col_name in column_name_list:
             column_content = table[col_name]
             # mass correction
-            if target in ['ngc1512', 'ngc1510']:
-                if (self.cat_info[col_name]['col_name'] in ['PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR']) | ('mass' in self.cat_info[col_name]['col_name']):
-                    # now check which entrances have a detection
-                    print(self.cat_info[col_name]['col_name'])
-                    mask_content = (column_content != -9999.0) & (column_content != -999.0)
-                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+            # if target in ['ngc1512', 'ngc1510']:
+            #     if (self.cat_info[col_name]['col_name'] in ['PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR']) | ('mass' in self.cat_info[col_name]['col_name']):
+            #         # now check which entrances have a detection
+            #         print(self.cat_info[col_name]['col_name'])
+            #         mask_content = (column_content != -9999.0) & (column_content != -999.0)
+            #         column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
 
             if self.cat_info[col_name]['unit'] is not None:
                 column_content *= self.cat_info[col_name]['unit']
@@ -826,21 +826,21 @@ class DataReleaseRoutines(CatalogInfo):
         for col_name in column_name_list:
             column_content = table[col_name]
             # flux correction
-            if target in ['ngc1512', 'ngc1510']:
-                if (self.cat_info[col_name]['col_name'][-3:] == 'mJy') | (self.cat_info[col_name]['col_name'][-7:] == 'mJy_ERR'):
-                    # now check which entrances have a detection
-                    mask_content = column_content != -9999.0
-                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
-                if self.cat_info[col_name]['col_name'][-4:] == 'VEGA':
-                    mask_content = column_content != -9999.0
-                    column_content[mask_content] += self.ngc1512_app_corr_offset_mag
-
-                # mass correction
-                if (self.cat_info[col_name]['col_name'] in ['PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR']) | ('mass' in self.cat_info[col_name]['col_name']):
-                    # now check which entrances have a detection
-                    print(self.cat_info[col_name]['col_name'])
-                    mask_content = (column_content != -9999.0) & (column_content != -999.0)
-                    column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+            # if target in ['ngc1512', 'ngc1510']:
+            #     if (self.cat_info[col_name]['col_name'][-3:] == 'mJy') | (self.cat_info[col_name]['col_name'][-7:] == 'mJy_ERR'):
+            #         # now check which entrances have a detection
+            #         mask_content = column_content != -9999.0
+            #         column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
+            #     if self.cat_info[col_name]['col_name'][-4:] == 'VEGA':
+            #         mask_content = column_content != -9999.0
+            #         column_content[mask_content] += self.ngc1512_app_corr_offset_mag
+            #
+            #     # mass correction
+            #     if (self.cat_info[col_name]['col_name'] in ['PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR']) | ('mass' in self.cat_info[col_name]['col_name']):
+            #         # now check which entrances have a detection
+            #         print(self.cat_info[col_name]['col_name'])
+            #         mask_content = (column_content != -9999.0) & (column_content != -999.0)
+            #         column_content[mask_content] *= self.ngc1512_app_corr_offset_flux
 
             if self.cat_info[col_name]['unit'] is not None:
                 column_content *= self.cat_info[col_name]['unit']
@@ -1049,7 +1049,7 @@ class DataReleaseRoutines(CatalogInfo):
 
         # get the documentation_file_name
         # doc_name = 'PHANGS_DR%s_CATR%s_compact_clusters_README.txt' % (self.data_release, self.catalog_release)
-        doc_name = 'hlsp_phangs-cat_hst_multi_all_multi_v1_readme.txt'
+        doc_name = 'hlsp_phangs-cat_hst_multi_all_multi_v2_readme.txt'
         doc_file = open(self.catalog_output_path + '/' + doc_name, "w")
 
         # divider for different sections
@@ -1457,8 +1457,8 @@ class DataReleaseRoutines(CatalogInfo):
                         'ngc1365 -0.8 -0.73 -0.64 -0.61 -0.73',
                         'ngc1385 -0.88 -0.81 -0.72 -0.69 -0.81',
                         'ngc1433 -0.81 -0.74 -0.65 -0.62 -0.74',
-                        'ngc1510 -2.534 -2.464 -2.374 -2.344 -2.464',
-                        'ngc1512 -2.534 -2.464 -2.374 -2.344 -2.464',
+                        'ngc1510 -0.81 -0.74 -0.65 -0.62 -0.74',
+                        'ngc1512 -0.81 -0.74 -0.65 -0.62 -0.74',
                         'ngc1559 -0.86 -0.79 -0.70 -0.67 -0.79',
                         'ngc1566 -0.81 -0.74 -0.65 -0.62 -0.74',
                         'ngc1672 -0.79 -0.72 -0.63 -0.6 -0.72',
