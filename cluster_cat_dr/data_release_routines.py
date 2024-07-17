@@ -23,7 +23,7 @@ from visualization_tool import PhotVisualize
 class DataReleaseRoutines(CatalogInfo):
     def __init__(self, hst_cc_ver, path2ir, catalog_output_path,
                  path2artifact=None, artifact_removal_flag=False, artifact_rais_file_not_found_flag=True,
-                 plot_removed_artifacts_flag=False, data_release=4, catalog_release=2, cat_ver='v2',
+                 plot_removed_artifacts_flag=False, data_release=4, catalog_release=3, cat_ver='v1',
                  existing_artifact_removal_flag=False,
                  path2questionable_artifacts=None,
                  path2diffraction_spike_masks=None,
@@ -34,7 +34,9 @@ class DataReleaseRoutines(CatalogInfo):
         # add input keys to attributes
         self.hst_cc_ver = hst_cc_ver
         self.path2ir = path2ir
-        self.catalog_output_path = catalog_output_path
+        # add version folder to catalog_output_path
+        self.catalog_output_path = catalog_output_path + '/phangs_hst_cc_dr%s_cr%s_%s' % (data_release, catalog_release,
+                                                                                          hst_cc_ver)
         self.path2artifact = path2artifact
         self.artifact_removal_flag = artifact_removal_flag
         self.artifact_rais_file_not_found_flag = artifact_rais_file_not_found_flag
@@ -62,7 +64,6 @@ class DataReleaseRoutines(CatalogInfo):
         # self.ngc1512_app_corr_offset_mag = 1.724
         # self.ngc1512_app_corr_offset_flux = 10**(-0.4*self.ngc1512_app_corr_offset_mag)
 
-
         # load constructor of parent class
         super().__init__()
 
@@ -75,7 +76,14 @@ class DataReleaseRoutines(CatalogInfo):
 
         removal_statistics_dict = {}
 
-        for target in self.phangs_hst_cluster_cat_target_list:
+        if self.hst_cc_ver == 'hst_ha':
+            target_list = self.phangs_hst_ha_cluster_cat_target_list
+        elif self.hst_cc_ver == 'ground_based_ha':
+            target_list = self.phangs_hst_cluster_cat_target_list
+        else:
+            raise KeyError('There is no target list for version ', self.hst_cc_ver)
+
+        for target in target_list:
 
             # get artifact removal table
             table_artifact = self.get_artifact_cat(target=target)
@@ -217,8 +225,15 @@ class DataReleaseRoutines(CatalogInfo):
             candidate_table.add_column(ml_class_corr_column, index=index_last_classification[0][0]+1)
 
             # set SED fits of not covered objects to -999
-            mask_bad_coverage_candidates = ((candidate_table['PHANGS_NON_DETECTION_FLAG'] >= 2) |
-                                            (candidate_table['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+            if self.hst_cc_ver == 'hst_ha':
+                mask_bad_coverage_candidates = ((((candidate_table['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                (candidate_table['PHANGS_NO_COVERAGE_FLAG'] >= 2)) &
+                                                 np.invert(candidate_table['HaFLAG'])) |
+                                                np.invert(candidate_table['HAeval']))
+            else:
+                mask_bad_coverage_candidates = ((candidate_table['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                (candidate_table['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+
             list_names_sed_fixes = ['SEDfix_age', 'SEDfix_ebv', 'SEDfix_mass', 'SEDfix_age_limlo', 'SEDfix_ebv_limlo',
                               'SEDfix_mass_limlo', 'SEDfix_age_limhi', 'SEDfix_ebv_limhi', 'SEDfix_mass_limhi']
             for names_sed_fixes in list_names_sed_fixes:
@@ -514,14 +529,33 @@ class DataReleaseRoutines(CatalogInfo):
                     list_names_sed_fixes = ['SEDfix_age', 'SEDfix_ebv', 'SEDfix_mass', 'SEDfix_age_limlo',
                                             'SEDfix_ebv_limlo', 'SEDfix_mass_limlo', 'SEDfix_age_limhi',
                                             'SEDfix_ebv_limhi', 'SEDfix_mass_limhi']
-                    mask_bad_coverage_sed = ((obs_table_1['PHANGS_NON_DETECTION_FLAG'] >= 2) |
-                                             (obs_table_1['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+                    # mask_bad_coverage_sed = ((obs_table_1['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                    #                          (obs_table_1['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+
+                    if self.hst_cc_ver == 'hst_ha':
+                        mask_bad_coverage_sed = ((((obs_table_1['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                   (obs_table_1['PHANGS_NO_COVERAGE_FLAG'] >= 2)) &
+                                                  np.invert(sed_table_1['HaFLAG'])) |
+                                                 np.invert(sed_table_1['HAeval']))
+                    else:
+                        mask_bad_coverage_sed = ((obs_table_1['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                 (obs_table_1['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+
                     for names_sed_fixes in list_names_sed_fixes:
                         sed_table_1[names_sed_fixes][mask_bad_coverage_sed] = -999
 
                     if sed_table_2 is not None:
-                        mask_bad_coverage_sed = ((obs_table_2['PHANGS_NON_DETECTION_FLAG'] >= 2) |
-                                                 (obs_table_2['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+                        # mask_bad_coverage_sed = ((obs_table_2['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                        #                          (obs_table_2['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+                        if self.hst_cc_ver == 'hst_ha':
+                            mask_bad_coverage_sed = ((((obs_table_2['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                       (obs_table_2['PHANGS_NO_COVERAGE_FLAG'] >= 2)) &
+                                                      np.invert(sed_table_2['HaFLAG'])) |
+                                                     np.invert(sed_table_2['HAeval']))
+                        else:
+                            mask_bad_coverage_sed = ((obs_table_2['PHANGS_NON_DETECTION_FLAG'] >= 2) |
+                                                     (obs_table_2['PHANGS_NO_COVERAGE_FLAG'] >= 2))
+
                         for names_sed_fixes in list_names_sed_fixes:
                             sed_table_2[names_sed_fixes][mask_bad_coverage_sed] = -999
 
@@ -549,7 +583,7 @@ class DataReleaseRoutines(CatalogInfo):
 
 
         print(removal_statistics_dict)
-        for target in self.phangs_hst_cluster_cat_target_list:
+        for target in target_list:
             print(target, 'hum_class12',
                   'first-insp:', removal_statistics_dict[target]['first_insp_human_class12'],
                   'second-insp: ', removal_statistics_dict[target]['second_insp_human_class12'],
@@ -874,27 +908,41 @@ class DataReleaseRoutines(CatalogInfo):
             internal release table
         """
 
-        # check if version is supported and get file name
-        if self.hst_cc_ver == 'SEDfix_final_test_catalogs':
-            # check if 0 id after ngc. this naming convention was not applied to the IR catalog naming files
-            if (target[:3] == 'ngc') & (target[3] == '0'):
-                target_str = target[0:3] + target[4:]
-            else:
-                target_str = target
-            if cl_class == 'candidates':
-                cat_file_name_ir = (
-                    Path('SEDfix_%s_Ha1_inclusiveGCcc_inclusiveGCclass_phangshst_candidates_bcw_v1p2_IR4.fits' %
-                         target_str))
-            else:
-                cat_file_name_ir = (
-                    Path('SEDfix_PHANGS_IR4_%s_Ha1_inclusiveGCcc_inclusiveGCclass_phangs_hst_v1p2_%s_%s.fits'
-                         % (target_str, classify, cl_class)))
+        # check if 0 id after ngc. this naming convention was not applied to the IR catalog naming files
+        if (target[:3] == 'ngc') & (target[3] == '0'):
+            target_str = target[0:3] + target[4:]
         else:
-            raise AttributeError(' the specified attribute hst_cc_ver is ', self.hst_cc_ver,
-                                 ' Which is not supported by this version.')
+            target_str = target
 
-        # get file path
-        file_path_ir = Path(self.path2ir) / cat_file_name_ir
+        # get file name
+        if cl_class == 'candidates':
+            if self.hst_cc_ver == 'hst_ha':
+                file_path_ir = \
+                    (Path(self.path2ir) /
+                     'SEDfix_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
+                     ('SEDfix_%s_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangshst_candidates_bcw_v1p2_IR4.fits' % target_str))
+
+            elif self.hst_cc_ver == 'ground_based_ha':
+                file_path_ir = \
+                    (Path(self.path2ir) /
+                     'SEDfix_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
+                    ('SEDfix_%s_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangshst_candidates_bcw_v1p2_IR4.fits' % target_str))
+            else:
+                raise KeyError(self.hst_cc_ver, ' not understand')
+        else:
+            if self.hst_cc_ver == 'hst_ha':
+                file_path_ir = \
+                    (Path(self.path2ir) /
+                     'SEDfix_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
+                     ('SEDfix_PHANGS_IR4_%s_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangs_hst_v1p2_%s_%s.fits' % (target_str, classify, cl_class)))
+            elif self.hst_cc_ver == 'ground_based_ha':
+                file_path_ir = \
+                    (Path(self.path2ir) /
+                     'SEDfix_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
+                    ('SEDfix_PHANGS_IR4_%s_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangs_hst_v1p2_%s_%s.fits' % (target_str, classify, cl_class)))
+            else:
+                raise KeyError(self.hst_cc_ver, ' not understand')
+
         # check if file exists
         if not os.path.isfile(file_path_ir):
             print(file_path_ir, ' not found ! ')
@@ -1049,7 +1097,7 @@ class DataReleaseRoutines(CatalogInfo):
 
         # get the documentation_file_name
         # doc_name = 'PHANGS_DR%s_CATR%s_compact_clusters_README.txt' % (self.data_release, self.catalog_release)
-        doc_name = 'hlsp_phangs-cat_hst_multi_all_multi_v2_readme.txt'
+        doc_name = 'hlsp_phangs-cat_hst_multi_all_multi_%s_readme.txt' % self.cat_ver
         doc_file = open(self.catalog_output_path + '/' + doc_name, "w")
 
         # divider for different sections

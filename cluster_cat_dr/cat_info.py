@@ -102,6 +102,13 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                            'doc_comment': 'J2000 Declination, ICRS frame, calibrated against selected Gaia sources.',
                            'tab_comment': 'J2000 Declination, ICRS frame, calibrated against selected Gaia sources.'
                            },
+            'PHANGS_GALAXY': {'col_name': 'PHANGS_GALAXY',
+                         # 'col_name': 'y_pix_coord',
+                         'unit': None,
+                         'unit_str': 'str',
+                         'doc_comment': '',
+                         'tab_comment': ''
+                         },
 
             # Morphological Classification
             'PHANGS_CLUSTER_CLASS_HUMAN': {'col_name': 'PHANGS_CLUSTER_CLASS_HUMAN',
@@ -554,6 +561,36 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                         'tab_comment': 'The reduced chisq value from the SED fit',
                                         },
 
+            'UBVIalldetected': {'col_name': 'UBVIalldetected', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'UBVIatleastlimits': {'col_name': 'UBVIatleastlimits', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'BVIalldetected': {'col_name': 'BVIalldetected', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'BVIatleastlimits': {'col_name': 'BVIatleastlimits', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'BValldetected': {'col_name': 'BValldetected', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'VIalldetected': {'col_name': 'VIalldetected', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NUVUalldetected': {'col_name': 'NUVUalldetected', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'UBVIcceval': {'col_name': 'UBVIcceval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'BVIcceval': {'col_name': 'BVIcceval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NOcceval': {'col_name': 'NOcceval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'BVceval': {'col_name': 'BVceval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'VIceval': {'col_name': 'VIceval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'NUVUceval': {'col_name': 'NUVUceval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_HaCDDssSUM_inaper_tot': {'col_name': 'Clust_HaCDDssSUM_inaper_tot', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_HaCDDssSUM_inaper_avg': {'col_name': 'Clust_HaCDDssSUM_inaper_avg', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_avgSNR_inaper': {'col_name': 'Clust_avgSNR_inaper', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_CenterInSeg': {'col_name': 'Clust_CenterInSeg', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_CoveredOneHalf': {'col_name': 'Clust_CoveredOneHalf', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_SegMaxInAp': {'col_name': 'Clust_SegMaxInAp', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'Clust_HaUnion': {'col_name': 'Clust_HaUnion', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'HaFLAG': {'col_name': 'HaFLAG', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YRO_fix': {'col_name': 'YRO_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'highEBV_fix': {'col_name': 'highEBV_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'YRO': {'col_name': 'YRO', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'OGC': {'col_name': 'OGC', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'highEBV': {'col_name': 'highEBV', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'general': {'col_name': 'general', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'B_VEGA': {'col_name': 'B_VEGA', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'B_VEGA_ERR': {'col_name': 'B_VEGA_ERR', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
+            'HAeval': {'col_name': 'HAeval', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
 
             'NBHa_intensity': {'col_name': 'NBHa_intensity', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'NBHa_intensity_medsub': {'col_name': 'NBHa_intensity_medsub', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
@@ -667,10 +704,8 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
             'OGCclass_okay': {'col_name': 'OGCclass_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'OGCcc_okay': {'col_name': 'OGCcc_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'envmask': {'col_name': 'envmask', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
-            'YRO_fix': {'col_name': 'YRO_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'YROclass_okay': {'col_name': 'YROclass_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'YROcc_okay': {'col_name': 'YROcc_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
-            'highEBV_fix': {'col_name': 'highEBV_fix', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'highEBVclass_okay': {'col_name': 'highEBVclass_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'highEBVcc_okay': {'col_name': 'highEBVcc_okay', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
             'SEDfix_age': {'col_name': 'SEDfix_age', 'unit': None, 'unit_str': '', 'doc_comment': '', 'tab_comment': ''},
@@ -905,11 +940,14 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
 
         self.cand_identifier_columns = ['ID_PHANGS_CLUSTERS_v1p2',
                                         'ID_PHANGS_ALLSOURCES_v1p2',
-                                        'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC']
+                                        'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC',
+                                        'PHANGS_GALAXY', 'PHANGS_DM', 'PHANGS_DMPC', 'PHANGS_DERR',
+                                        ]
 
         self.identifier_columns = ['INDEX', 'ID_PHANGS_CLUSTERS_v1p2',
                                    # 'ID_PHANGS_ALLSOURCES',
-                                   'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC']
+                                   'PHANGS_X', 'PHANGS_Y', 'PHANGS_RA', 'PHANGS_DEC',
+                                   'PHANGS_GALAXY', 'PHANGS_DM', 'PHANGS_DMPC', 'PHANGS_DERR',]
 
         self.classification_columns_doc = ['PHANGS_CLUSTER_CLASS_HUMAN', 'PHANGS_CLUSTER_CLASS_ML_VGG',
                                        'PHANGS_CLUSTER_CLASS_ML_VGG_QUAL', 'class_ml_vgg_corr']
@@ -928,11 +966,13 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                              self.classification_columns + self.example_photometry_columns +
                              self.detect_shape_columns + ['cc_class'])
 
+        # To DO not complete !!!
         self.sed_columns_doc = ['PHANGS_AGE_MINCHISQ', 'PHANGS_AGE_MINCHISQ_ERR',
                             'PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR',
                             'PHANGS_EBV_MINCHISQ', 'PHANGS_EBV_MINCHISQ_ERR',
                             'PHANGS_REDUCED_MINCHISQ',
-                            'NBHa_intensity', 'NBHa_intensity_medsub', 'NBHa_mask_medsub_lev1', 'NBHa_mask_medsub_lev2',
+
+                            'NBHa_intensity', 'NBHa_intensity_medsub', 'Clust_HaCDDssSUM_inaper_avg', 'NBHa_mask_medsub_lev1', 'NBHa_mask_medsub_lev2',
                                 'NBHa_mask_medsub_lev3', 'NBHa_mask_medsub_lev5', 'NBHa_mask_medsub_lev10',
                                 'NBHa_intensity_medsub_inseg', 'NBHa_HIIreg', 'OGCpoly_UBVI', 'FlagOGC_UBVI',
                                 'OGC_Cull1', 'OGCpoly_BVI', 'FlagOGC_BVI', 'OGC_Cull2', 'OGCrpoly_UBVI',
@@ -990,9 +1030,42 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                             'PHANGS_MASS_MINCHISQ', 'PHANGS_MASS_MINCHISQ_ERR',
                             'PHANGS_EBV_MINCHISQ', 'PHANGS_EBV_MINCHISQ_ERR',
                             'PHANGS_REDUCED_MINCHISQ',
-                            'NBHa_intensity', 'NBHa_intensity_medsub', 'NBHa_mask_medsub_lev1', 'NBHa_mask_medsub_lev2',
-                                'NBHa_mask_medsub_lev3', 'NBHa_mask_medsub_lev5', 'NBHa_mask_medsub_lev10',
-                                'NBHa_intensity_medsub_inseg', 'NBHa_HIIreg', 'OGCpoly_UBVI', 'FlagOGC_UBVI',
+                            'UBVIalldetected',
+                            'UBVIatleastlimits',
+                            'BVIalldetected',
+                            'BVIatleastlimits',
+                            'BValldetected',
+                            'VIalldetected',
+                            'NUVUalldetected',
+                            'UBVIcceval',
+                            'BVIcceval',
+                            'NOcceval',
+                            'BVceval',
+                            'VIceval',
+                            'NUVUceval',
+                            'Clust_HaCDDssSUM_inaper_tot',
+                            'Clust_HaCDDssSUM_inaper_avg',
+                            'Clust_avgSNR_inaper',
+                            'Clust_CenterInSeg',
+                            'Clust_CoveredOneHalf',
+                            'Clust_SegMaxInAp',
+                            'Clust_HaUnion',
+                            'HaFLAG',
+                            'YRO_fix',
+                            'highEBV_fix',
+                            'YRO',
+                            'OGC',
+                            'highEBV',
+                            'general',
+                            'B_VEGA',
+                            'B_VEGA_ERR',
+                            'HAeval',
+
+                            #'NBHa_intensity',
+                            #'NBHa_intensity_medsub', 'NBHa_mask_medsub_lev1', 'NBHa_mask_medsub_lev2',
+                            #    'NBHa_mask_medsub_lev3', 'NBHa_mask_medsub_lev5', 'NBHa_mask_medsub_lev10',
+                            #    'NBHa_intensity_medsub_inseg', 'NBHa_HIIreg',
+                            'OGCpoly_UBVI', 'FlagOGC_UBVI',
                                 'OGC_Cull1', 'OGCpoly_BVI', 'FlagOGC_BVI', 'OGC_Cull2', 'OGCrpoly_UBVI',
                                 'FlagOGCr_UBVI', 'OGCr_Cull1', 'OGCrpoly_BVI', 'FlagOGCr_BVI', 'OGCr_Cull2',
                                 'YROpoly_UBVI', 'FlagYRO_UBVI', 'YRO_Cull1', 'YROpoly_BVI', 'FlagYRO_BVI', 'YRO_Cull2',
@@ -1038,11 +1111,17 @@ class CatalogInfo(PhangsObsInfo, PhysParams):
                                 'mm_ZyoungallowhighEBV_bestmode_age_limhi',
                                 'mm_ZyoungallowhighEBV_bestmode_ebv_limhi',
                                 'mm_ZyoungallowhighEBV_bestmode_mass_limhi', 'OGC_fix', 'OGC_spiraldigit',
-                                'OGCclass_okay', 'OGCcc_okay', 'envmask', 'YRO_fix', 'YROclass_okay', 'YROcc_okay',
-                                'highEBV_fix', 'highEBVclass_okay', 'highEBVcc_okay', 'SEDfix_age', 'SEDfix_ebv',
+                                'OGCclass_okay',
+                            #'OGCcc_okay',
+                            'envmask',
+                            #'YROclass_okay',
+                            #'YROcc_okay',
+                            #    'highEBVclass_okay', 'highEBVcc_okay',
+                            'SEDfix_age', 'SEDfix_ebv',
                                 'SEDfix_mass', 'SEDfix_age_limlo', 'SEDfix_ebv_limlo', 'SEDfix_mass_limlo',
                                 'SEDfix_age_limhi', 'SEDfix_ebv_limhi', 'SEDfix_mass_limhi', 'SEDfix_likelihood_norm',
-                                'PHANGS_DM', 'PHANGS_DMPC', 'PHANGS_DERR']
+                                'PHANGS_DM', 'PHANGS_DMPC', 'PHANGS_DERR'
+                            ]
 
         self.tab2_columns = self.identifier_columns + self.sed_columns
 

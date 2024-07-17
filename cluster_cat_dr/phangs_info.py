@@ -49,7 +49,7 @@ class PhangsObsInfo:
                                                 'ngc4571', 'ngc4579', 'ngc4654', 'ngc5128', 'ngc6744', 'ngc7496',
                                                 'ngc7793']
 
-        # targets for which a cluster catalog was created
+        # # targets for which a cluster catalog was created
         self.phangs_hst_cluster_cat_target_list = ['ic1954', 'ic5332', 'ngc0628e', 'ngc0628c', 'ngc0685', 'ngc1087',
                                                    'ngc1097', 'ngc1300', 'ngc1317', 'ngc1365', 'ngc1385', 'ngc1433',
                                                    'ngc1512', 'ngc1559', 'ngc1566', 'ngc1672', 'ngc1792', 'ngc2775',
@@ -57,6 +57,12 @@ class PhangsObsInfo:
                                                    'ngc4298', 'ngc4303', 'ngc4321', 'ngc4535', 'ngc4536', 'ngc4548',
                                                    'ngc4569', 'ngc4571', 'ngc4654', 'ngc4689', 'ngc4826', 'ngc5068',
                                                    'ngc5248', 'ngc6744', 'ngc7496']
+        # targets for which a cluster catalog was created
+        self.phangs_hst_ha_cluster_cat_target_list = ['ic5332', 'ngc0628e', 'ngc0628c', 'ngc1087',
+                                                   'ngc1300', 'ngc1365', 'ngc1385', 'ngc1433',
+                                                   'ngc1512', 'ngc1566', 'ngc1672', 'ngc3351', 'ngc3627', 'ngc4254',
+                                                   'ngc4303', 'ngc4321', 'ngc5068',
+                                                   'ngc7496']
 
 
         self.hst_ver_folder_names = {'v1.0': 'v1.0'}
