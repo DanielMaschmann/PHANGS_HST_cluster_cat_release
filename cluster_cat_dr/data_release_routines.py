@@ -185,6 +185,7 @@ class DataReleaseRoutines(CatalogInfo):
             increase_y_sort = np.argsort(candidate_table['PHANGS_Y'])
             candidate_table = candidate_table[increase_y_sort]
             # get ids from all objects which have been classified as a cluster
+            print('N nan values in candidate ', sum(np.isnan(candidate_table['PHANGS_CLUSTER_CLASS_HUMAN'])))
             indexes_with_clusters = np.where(
                 # can be human cluster
                 (candidate_table['PHANGS_CLUSTER_CLASS_HUMAN'] == 1) |
@@ -301,7 +302,7 @@ class DataReleaseRoutines(CatalogInfo):
                                 bcw_classify = table_re_classified[artifact_in_table_re_classified]['BCW_estimate']
                                 # check if BCW classified it as a cluster
                                 if bcw_classify in [1, 2, 3, -999]:
-                                    print('BCW: No artefact')
+                                    print( classify, cl_class,' BCW: No artefact ')
                                     continue
                                 # # check if MF classified them as a cluster if BCW did not classified them
                                 # elif bcw_classify == -999:
@@ -316,7 +317,7 @@ class DataReleaseRoutines(CatalogInfo):
                                 #         if np.sum(np.array(artifact_in_table_ir, dtype=int)) > 0:
                                 #             used_artifacts_mask_table_artifact[artifact_index] = True
                                 else:
-                                    print('BCW: artefact')
+                                    print( classify, cl_class,' BCW: artefact')
                                     artifact_mask_table_ir += artifact_in_table_ir
                                     # add identified artifacts into a mask for plotting
                                     if np.sum(np.array(artifact_in_table_ir, dtype=int)) > 0:
@@ -435,9 +436,18 @@ class DataReleaseRoutines(CatalogInfo):
                     very_red_star_mask_table_ir = (vi_color > self.v_i_color_lim) & (ci < self.ci_lim)
                     print('number of red stars (V-I > %.1f & CI < %.1f)' % (self.v_i_color_lim, self.ci_lim),
                           sum(very_red_star_mask_table_ir))
+                    print('vi_color ', vi_color[table_ir['ID_PHANGS_CLUSTERS_v1p2'] == 763])
+                    print('ci ', ci[table_ir['ID_PHANGS_CLUSTERS_v1p2'] == 763])
+                    print('PHANGS_F555W_vega_tot ', table_ir['PHANGS_F555W_vega_tot'][table_ir['ID_PHANGS_CLUSTERS_v1p2'] == 763])
+                    print('PHANGS_F814W_vega_tot ', table_ir['PHANGS_F814W_vega_tot'][table_ir['ID_PHANGS_CLUSTERS_v1p2'] == 763])
 
                     print('total artefact removal: ', sum(artifact_mask_table_ir + existing_artifact_mask_table_ir +
                                                           artifact_in_diffraction_spike + very_red_star_mask_table_ir))
+                    print('removing artifact_mask_table_ir ', table_ir['ID_PHANGS_CLUSTERS_v1p2'][artifact_mask_table_ir])
+                    print('removing existing_artifact_mask_table_ir ', table_ir['ID_PHANGS_CLUSTERS_v1p2'][existing_artifact_mask_table_ir])
+                    print('removing artifact_in_diffraction_spike ', table_ir['ID_PHANGS_CLUSTERS_v1p2'][artifact_in_diffraction_spike])
+                    print('removing very_red_star_mask_table_ir ', table_ir['ID_PHANGS_CLUSTERS_v1p2'][very_red_star_mask_table_ir])
+
                     if target in removal_statistics_dict.keys():
                         removal_statistics_dict[target].update({
                             'first_insp_%s_%s' % (classify, cl_class): sum(existing_artifact_mask_table_ir),
@@ -919,27 +929,27 @@ class DataReleaseRoutines(CatalogInfo):
             if self.hst_cc_ver == 'hst_ha':
                 file_path_ir = \
                     (Path(self.path2ir) /
-                     'SEDfix_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
-                     ('SEDfix_%s_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangshst_candidates_bcw_v1p2_IR4.fits' % target_str))
+                     'SEDfix_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Oct1' /
+                     ('SEDfix_%s_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Oct1_phangshst_candidates_bcw_v1p2_IR4.fits' % target_str))
 
             elif self.hst_cc_ver == 'ground_based_ha':
                 file_path_ir = \
                     (Path(self.path2ir) /
-                     'SEDfix_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
-                    ('SEDfix_%s_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangshst_candidates_bcw_v1p2_IR4.fits' % target_str))
+                     'SEDfix_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Oct1' /
+                    ('SEDfix_%s_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Oct1_phangshst_candidates_bcw_v1p2_IR4.fits' % target_str))
             else:
                 raise KeyError(self.hst_cc_ver, ' not understand')
         else:
             if self.hst_cc_ver == 'hst_ha':
                 file_path_ir = \
                     (Path(self.path2ir) /
-                     'SEDfix_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
-                     ('SEDfix_PHANGS_IR4_%s_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangs_hst_v1p2_%s_%s.fits' % (target_str, classify, cl_class)))
+                     'SEDfix_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Oct1' /
+                     ('SEDfix_PHANGS_IR4_%s_NewModelsHSTHaUnionHaFLAG11pc_inclusiveGCcc_inclusiveGCclass_Oct1_phangs_hst_v1p2_%s_%s.fits' % (target_str, classify, cl_class)))
             elif self.hst_cc_ver == 'ground_based_ha':
                 file_path_ir = \
                     (Path(self.path2ir) /
-                     'SEDfix_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21' /
-                    ('SEDfix_PHANGS_IR4_%s_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Jun21_phangs_hst_v1p2_%s_%s.fits' % (target_str, classify, cl_class)))
+                     'SEDfix_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Oct1' /
+                    ('SEDfix_PHANGS_IR4_%s_NewModelsNBHaUnionHaFLAG91pc_inclusiveGCcc_inclusiveGCclass_Oct1_phangs_hst_v1p2_%s_%s.fits' % (target_str, classify, cl_class)))
             else:
                 raise KeyError(self.hst_cc_ver, ' not understand')
 
@@ -1376,7 +1386,7 @@ class DataReleaseRoutines(CatalogInfo):
         self.write_string_to_file(file=doc_file, string=description_str, max_length=txt_col_width)
         doc_file.writelines(' \n')
 
-        path_sample_table = ('/home/benutzer/data/PHANGS_products/sample_table/v1p6' + '/phangs_sample_table_v1p6.fits')
+        path_sample_table = ('/Users/dmaschmann/data/PHANGS_products/sample_table/v1p6' + '/phangs_sample_table_v1p6.fits')
         hdu_sample_table = fits.open(path_sample_table)
         data_sample_table = hdu_sample_table[1].data
         for target in self.phangs_galaxy_list:
@@ -1557,9 +1567,9 @@ class DataReleaseRoutines(CatalogInfo):
         else:
             raise KeyError('classify string not understood')
 
-        x_hull = np.load('/home/benutzer/Documents/projects/hst_cluster_catalog/analysis/segmentation/'
+        x_hull = np.load('/Users/dmaschmann/Documents/projects/hst_cluster_catalog/analysis/segmentation/'
                          'data_output/vi_hull_%s_%svi_%s_%i.npy' % (region_str, y_color, classify_str, class_number))
-        y_hull = np.load('/home/benutzer/Documents/projects/hst_cluster_catalog/analysis/segmentation/'
+        y_hull = np.load('/Users/dmaschmann/Documents/projects/hst_cluster_catalog/analysis/segmentation/'
                          'data_output/%s_hull_%s_%svi_%s_%i.npy' %
                          (y_color, region_str, y_color, classify_str, class_number))
 
